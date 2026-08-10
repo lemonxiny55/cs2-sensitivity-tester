@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CS2 灵敏度实验室</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+      .pause-overlay[hidden] { display: none; }
+      .setup-panel select { min-height: 46px; padding: 10px 12px; border: 1px solid #526158; border-radius: 4px; outline: none; color: #edf2ee; background: #111615; }
+      .setup-panel select:focus { border-color: #7de0a2; box-shadow: 0 0 0 3px rgba(125,224,162,.13); }
+      .game-mode .app-shell { max-width: none; padding: 0; }
+      .game-mode .topbar, .game-mode .test-header { display: none; }
+      .game-mode .test-screen { position: fixed; inset: 0; display: block; height: 100vh; padding: 0; overflow: hidden; background: #020403; }
+      .game-mode .arena { position: absolute; top: 50%; left: 50%; width: var(--game-width); height: var(--game-height); max-width: none; transform: translate(-50%, -50%) scale(var(--game-scale-x), var(--game-scale-y)); transform-origin: center; }
+    </style>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar"><a class="wordmark" href="index.html">CS2 <span>灵敏度实验室</span></a><p>本地盲测校准</p></header>
+      <section data-screen="setup" class="setup-screen">
+        <div class="intro-copy"><p class="eyebrow">个人瞄准校准</p><h1>找出更适合你的<br>CS2 灵敏度区间</h1><p>通过随机且隐藏档位的小目标定位、跟枪与反应点击，比较你当前灵敏度附近的实际表现。</p><div class="method-list"><span>5 个候选档位</span><span>15 个短项目</span><span>约 10 分钟</span></div></div>
+        <form id="setup-form" class="setup-panel"><h2>开始校准</h2><label>当前 CS2 灵敏度<input id="sensitivity" inputmode="decimal" placeholder="例如 1.20" required></label><label>DPI（可选，仅记录）<input id="dpi" inputmode="numeric" placeholder="例如 800"></label><p class="fine-print">不会修改系统鼠标设置。测试仅在此浏览器内模拟候选档位。</p><button class="button primary" type="submit">进入测试</button></form>
+      </section>
+      <section data-screen="test" hidden class="test-screen"><div class="test-header"><div><p id="task-name" class="eyebrow"></p><h2 id="task-description"></h2></div><div class="progress-copy"><span id="progress"></span><div class="progress-track"><i id="progress-bar"></i></div></div></div><div id="arena" class="arena" tabindex="0"><div id="target" class="target" hidden></div><div id="crosshair" class="crosshair" aria-hidden="true"></div><div class="hud"><span>命中 <b id="stat-hits"></b></span><span id="stat-time"></span></div><div id="pause-overlay" class="pause-overlay" hidden><div><p id="pause-message"></p><button class="button primary" type="button">继续测试</button></div></div></div></section>
+      <section data-screen="results" hidden class="results-screen"><div class="result-heading"><p class="eyebrow">本次建议</p><h1><span id="recommended">-</span></h1><p>建议区间 <b id="range">-</b> <span id="confidence" class="badge"></span></p><p id="retest" class="caution" hidden>本次结果接近，建议休息后再测一次确认。</p></div><div class="result-grid"><section><h2>候选对比</h2><div class="table-wrap"><table><thead><tr><th>排序</th><th>灵敏度</th><th>命中率</th><th>综合分</th></tr></thead><tbody id="results-body"></tbody></table></div></section><section><div class="section-title"><h2>本地历史</h2><button id="clear-history" class="icon-button" title="清除全部历史" aria-label="清除全部历史">×</button></div><div id="history-chart" class="history-chart"></div><div id="history-list" class="history-list"></div></section></div><div class="result-actions"><button id="restart" class="button secondary">再次测试</button><button id="export-history" class="button primary">导出 JSON</button></div></section>
+    </main>
+    <div id="toast" class="toast" hidden role="status"></div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

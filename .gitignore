@@ -1,0 +1,8 @@
+# Local test and editor artifacts
+node_modules/
+coverage/
+.DS_Store
+Thumbs.db
+
+# Downloaded browser exports
+cs2-sensitivity-history*.json
