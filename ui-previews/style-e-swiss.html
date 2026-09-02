@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>UI 预览 · 方向 E 瑞士编辑风</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --ink: #141412;
+    --dim: #75756e;
+    --hair: #dcdcd4;
+    --orange: #ff4d00;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: "Segoe UI", "Microsoft YaHei", Helvetica, Arial, sans-serif; padding-bottom: 80px; }
+  .page-tag {
+    position: sticky; top: 0; z-index: 9;
+    background: var(--orange); color: #fff;
+    font-weight: 700; letter-spacing: .06em; padding: 10px 24px; font-size: 14px;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 32px 24px; }
+  .screen-label {
+    margin: 52px 0 0; padding: 14px 0 18px;
+    border-top: 3px solid var(--ink);
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .screen-label b { font-size: 15px; letter-spacing: .04em; }
+  .screen-label span { font-size: 12px; color: var(--dim); letter-spacing: .1em; }
+
+  /* ── 设置页 ── */
+  .setup { display: grid; grid-template-columns: 1.15fr 1fr; gap: 56px; margin-top: 26px; align-items: start; }
+  .num { font-size: 13px; color: var(--orange); font-weight: 700; letter-spacing: .08em; margin-bottom: 16px; }
+  h1 { font-size: 52px; line-height: 1.12; letter-spacing: -.02em; font-weight: 800; }
+  .intro-copy p.sub { color: var(--dim); margin-top: 20px; line-height: 1.9; font-size: 15px; max-width: 40ch; }
+  .chips { display: flex; gap: 0; margin-top: 28px; border-top: 1px solid var(--hair); }
+  .chip { flex: 1; padding: 14px 0 2px; border-right: 1px solid var(--hair); padding-right: 12px; margin-right: 12px; }
+  .chip:last-child { border-right: none; }
+  .chip i { display: block; font-style: normal; font-size: 11px; color: var(--dim); letter-spacing: .1em; }
+  .chip b { font-size: 15px; }
+  form { padding-top: 6px; display: flex; flex-direction: column; gap: 22px; }
+  label { font-size: 12px; color: var(--dim); display: block; letter-spacing: .12em; font-weight: 600; }
+  input, select {
+    width: 100%; margin-top: 8px; padding: 10px 2px;
+    background: transparent; border: none; border-bottom: 2px solid var(--ink);
+    color: var(--ink); font-size: 20px; outline: none; border-radius: 0;
+    font-family: Consolas, monospace;
+  }
+  select { font-family: inherit; font-size: 16px; }
+  input:focus, select:focus { border-bottom-color: var(--orange); }
+  .hint { font-size: 12.5px; color: var(--orange); margin-top: 6px; font-weight: 600; }
+  .btn {
+    margin-top: 10px; padding: 15px; cursor: pointer;
+    background: var(--ink); border: none; color: #fff;
+    font-size: 14px; font-weight: 700; letter-spacing: .25em;
+  }
+  .fine-print { font-size: 11.5px; color: #a3a39a; line-height: 1.7; border-left: 2px solid var(--hair); padding-left: 10px; }
+
+  /* ── 测试页 ── */
+  .test-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px; }
+  .task-name { color: var(--orange); font-size: 13px; font-weight: 700; letter-spacing: .1em; }
+  .task-desc { font-size: 26px; margin-top: 8px; font-weight: 800; letter-spacing: -.01em; }
+  .progress-copy { text-align: right; font-size: 13px; color: var(--dim); font-weight: 600; }
+  .progress-copy b { color: var(--ink); font-size: 17px; }
+  .progress-track { width: 240px; height: 3px; background: var(--hair); margin-top: 10px; }
+  .progress-track i { display: block; height: 100%; width: 40%; background: var(--orange); }
+  .arena {
+    position: relative; height: 400px; overflow: hidden;
+    background:
+      linear-gradient(var(--hair) 1px, transparent 1px),
+      linear-gradient(90deg, var(--hair) 1px, transparent 1px),
+      #ffffff;
+    background-size: 100% 50px, 50px 100%, auto;
+    border: 2px solid var(--ink);
+  }
+  .target {
+    position: absolute; top: 25%; left: 62%;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--orange); box-shadow: 4px 4px 0 rgba(20,20,18,.9);
+  }
+  .crosshair { position: absolute; top: 53%; left: 41%; width: 0; height: 0; }
+  .crosshair::before, .crosshair::after { content: ""; position: absolute; background: var(--ink); }
+  .crosshair::before { width: 26px; height: 2.5px; left: -13px; top: -1.25px; }
+  .crosshair::after { width: 2.5px; height: 26px; left: -1.25px; top: -13px; }
+  .hud { position: absolute; left: 18px; bottom: 16px; display: flex; gap: 0; font-family: Consolas, monospace; font-size: 14px; }
+  .hud span { border: 2px solid var(--ink); background: #fff; padding: 8px 16px; }
+  .hud span + span { border-left: none; }
+  .hud b { color: var(--orange); }
+
+  /* ── 结果页 ── */
+  .result-grid { display: grid; grid-template-columns: 340px 1fr; gap: 48px; margin-top: 26px; }
+  .big-num { font-size: 110px; font-family: Consolas, monospace; font-weight: 700; color: var(--orange); line-height: 1; margin: 10px 0 14px; letter-spacing: -.05em; }
+  .range-line { color: var(--dim); font-size: 14px; line-height: 2; }
+  .badge { display: inline-block; margin-left: 6px; padding: 3px 10px; background: var(--ink); color: #fff; font-size: 12px; letter-spacing: .1em; vertical-align: 2px; }
+  .cm360 { font-family: Consolas, monospace; font-size: 13px; color: var(--dim); margin-top: 14px; border-top: 1px solid var(--hair); padding-top: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; border-top: 3px solid var(--ink); }
+  th { text-align: left; color: var(--dim); font-weight: 600; font-size: 12px; letter-spacing: .12em; padding: 12px 10px; border-bottom: 1px solid var(--hair); }
+  td { padding: 15px 10px; text-align: right; border-bottom: 1px solid var(--hair); font-family: Consolas, monospace; }
+  th:first-child, td:first-child { text-align: left; }
+  td.hl { color: var(--orange); font-weight: 700; }
+  tr.hl-row td { background: #fff3ec; }
+  td.dash { color: #c9c9c0; }
+  .actions { display: flex; gap: 12px; margin-top: 34px; }
+  .btn.secondary { background: none; border: 2px solid var(--ink); color: var(--ink); letter-spacing: .2em; padding: 13px 30px; }
+</style>
+</head>
+<body>
+<div class="page-tag">方向 E · 瑞士编辑风 —— 静态预览（黑白大字版式 × 信号橙 · 锐利网格）</div>
+<div class="wrap">
+
+  <div class="screen-label"><b>01 / 设置页</b><span>SETUP</span></div>
+  <div class="setup">
+    <div class="intro-copy">
+      <p class="num">N°01 — AIM CALIBRATION</p>
+      <h1>找出更适合你的<br>CS2 灵敏度区间。</h1>
+      <p class="sub">先暖手，再通过随机且隐藏档位的两阶段盲测——快速筛选后对最有潜力的档位深度测试。</p>
+      <div class="chips">
+        <span class="chip"><i>候选</i><b>5 档位</b></span>
+        <span class="chip"><i>流程</i><b>暖手 + 14 轮</b></span>
+        <span class="chip"><i>耗时</i><b>约 9 分钟</b></span>
+      </div>
+    </div>
+    <form>
+      <label>当前 CS2 灵敏度<input value="1.20"></label>
+      <label>DPI（可选）<input value="800"><span class="hint">≈ 43.3 cm 转一圈（360°）</span></label>
+      <label>CS2 分辨率<select><option>1920 x 1080</option></select></label>
+      <label>非 16:9 显示方式<select><option>拉伸铺满</option></select></label>
+      <button class="btn" type="button">进入测试 →</button>
+      <p class="fine-print">不会修改系统鼠标设置。测试仅在此浏览器内模拟候选档位。</p>
+    </form>
+  </div>
+
+  <div class="screen-label"><b>02 / 测试页 — 阶段 1 · 小目标定位</b><span>STAGE 1 / FLICK</span></div>
+  <div>
+    <div class="test-head">
+      <div><p class="task-name">筛选轮 · FLICK</p><p class="task-desc">快速击中出现的小目标</p></div>
+      <div class="progress-copy"><b>3</b> / 5 &nbsp;·&nbsp; 阶段 1<div class="progress-track"><i></i></div></div>
+    </div>
+    <div class="arena">
+      <div class="target"></div>
+      <div class="crosshair"></div>
+      <div class="hud"><span>命中 <b>5 / 8</b></span><span>计时 03.2s</span></div>
+    </div>
+  </div>
+
+  <div class="screen-label"><b>03 / 结果页</b><span>REPORT</span></div>
+  <div class="result-grid">
+    <div>
+      <p class="num">N°03 — 本次建议</p>
+      <div class="big-num">1.20</div>
+      <p class="range-line">建议区间 <b style="color:var(--ink)">1.06 – 1.34</b><span class="badge">中置信度</span></p>
+      <p class="cm360">基准 1.20 ≈ 43.3 cm/360°<br>→ 推荐 1.20 ≈ 43.3 cm/360°</p>
+    </div>
+    <div>
+      <table>
+        <thead><tr><th>灵敏度</th><th style="text-align:right">定位</th><th style="text-align:right">跟枪</th><th style="text-align:right">反应</th><th style="text-align:right">综合分</th></tr></thead>
+        <tbody>
+          <tr><td>0.91</td><td class="dash">62.3</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td></tr>
+          <tr><td>1.06</td><td>71.2</td><td>64.5</td><td>66.0</td><td>66.8</td></tr>
+          <tr class="hl-row"><td>1.20</td><td class="hl">78.4</td><td class="hl">72.1</td><td class="hl">70.3</td><td class="hl">73.6</td></tr>
+          <tr><td>1.34</td><td>74.9</td><td>69.8</td><td>68.1</td><td>70.9</td></tr>
+          <tr><td>1.49</td><td class="dash">58.1</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td></tr>
+        </tbody>
+      </table>
+      <div class="actions">
+        <button class="btn secondary" type="button">再次测试</button>
+        <button class="btn" type="button">导出 JSON →</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

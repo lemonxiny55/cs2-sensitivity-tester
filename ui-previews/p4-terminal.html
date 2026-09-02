@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>方向 4 · 复古终端风</title>
+<style>
+  :root {
+    --bg: #050a06; --panel: #081108; --line: #1d3a24;
+    --fg: #52e07d; --bright: #a8ffc4; --dim: #2f7a47;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: Consolas, "Courier New", monospace;
+    min-height: 100vh; font-size: 14px;
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px);
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 22px 20px; }
+  .glow { text-shadow: 0 0 6px rgba(82,224,125,.45); }
+  .dim { color: var(--dim); }
+  .bright { color: var(--bright); }
+
+  .topline { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 18px; }
+  .cursor { display: inline-block; width: 9px; height: 16px; background: var(--fg); vertical-align: -2px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .frame { border: 1px solid var(--line); background: var(--panel); padding: 18px 20px; margin-bottom: 18px; }
+  .frame-title { color: var(--dim); margin-bottom: 14px; }
+  .frame-title::before { content: "┌─ "; }
+  .frame-title::after { content: " ─┐"; }
+
+  h1 { font-size: 22px; letter-spacing: .1em; margin: 4px 0 12px; }
+  .sub { line-height: 1.9; color: var(--fg); max-width: 66ch; }
+  .sub b { color: var(--bright); }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  th { text-align: left; color: var(--dim); font-weight: 400; border-bottom: 1px dashed var(--line); padding: 6px 8px; font-size: 12px; }
+  td { padding: 7px 8px; border-bottom: 1px solid #12240f; font-size: 13px; }
+  tr:hover td { background: #0c1a0c; }
+
+  .form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 22px; }
+  label { display: block; color: var(--dim); font-size: 12px; }
+  label .q { color: var(--fg); }
+  input, select {
+    width: 100%; margin-top: 5px; padding: 8px 10px; font-size: 15px; outline: none;
+    background: #04280f; border: 1px solid var(--line); color: var(--bright);
+    font-family: Consolas, monospace;
+  }
+  input:focus { border-color: var(--fg); box-shadow: 0 0 8px rgba(82,224,125,.25); }
+  .hint { font-size: 11px; color: var(--dim); margin-top: 4px; }
+  .full { grid-column: 1 / -1; }
+  .btn {
+    width: 100%; margin-top: 4px; padding: 12px; cursor: pointer;
+    background: transparent; border: 1px solid var(--fg); color: var(--bright);
+    font-size: 15px; letter-spacing: .25em; font-family: Consolas, monospace;
+  }
+  .btn:hover { background: #0c2a12; box-shadow: 0 0 14px rgba(82,224,125,.3); }
+  .rawline { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); margin-top: 10px; }
+
+  .log .row { display: flex; gap: 16px; padding: 5px 0; border-bottom: 1px dashed #12240f; font-size: 13px; }
+  .log .row:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topline glow">
+      <span>┌─ cs2-sens-lab v2.0 ─ 盲测协议 BLIND-5</span>
+      <span class="dim">RAW_INPUT=ON · ROUND=20s · TASKS=4 <span class="cursor"></span></span>
+    </div>
+
+    <div class="frame">
+      <div class="frame-title glow">任务简报 / BRIEFING</div>
+      <h1 class="glow">&gt; 找到你的精准灵敏度_</h1>
+      <p class="sub">围绕你填写的灵敏度生成 <b>5 个隐藏候选档位</b>：先测基准档热手，其余 4 档随机盲测。每档连测 4 类任务，<b>分环节加权记分</b>，二次拟合给出推荐值与建议区间。</p>
+      <table>
+        <tr><th>#</th><th>任务</th><th>说明</th><th>时长</th></tr>
+        <tr><td class="dim">01</td><td class="bright">四目标</td><td class="dim">连续定位 · 目标转移</td><td>20s</td></tr>
+        <tr><td class="dim">02</td><td class="bright">跟枪</td><td class="dim">按住左键贴住递减</td><td>20s</td></tr>
+        <tr><td class="dim">03</td><td class="bright">六目标</td><td class="dim">小目标 · 大范围</td><td>20s</td></tr>
+        <tr><td class="dim">04</td><td class="bright">单球点击</td><td class="dim">延迟出现 · 首发精准</td><td>20s</td></tr>
+      </table>
+    </div>
+
+    <div class="frame">
+      <div class="frame-title glow">装备校准 / SETUP</div>
+      <form class="form" onsubmit="return false">
+        <label>基准灵敏度 <span class="q">$sens</span><input value="0.821"></label>
+        <label>DPI <span class="q">$dpi</span><input value="800"><div class="hint">DPI 由鼠标硬件决定，此处无法修改，仅用于换算 cm/360。</div></label>
+        <label>分辨率 <span class="q">$res</span><select><option>1920 x 1080</option></select></label>
+        <label>显示方式 <span class="q">$mode</span><select><option>保留比例（黑边）</option></select></label>
+        <div class="full"><button class="btn glow">▶ RUN TEST_</button></div>
+        <div class="full rawline"><span>MOUSE RAW INPUT</span><span class="bright">● ENABLED</span></div>
+      </form>
+    </div>
+
+    <div class="frame log">
+      <div class="frame-title glow">历史记录 / LOG</div>
+      <div class="row"><span class="dim">08-29</span><span class="bright">sens 0.92</span><span>score 87.4</span><span class="dim">conf HIGH</span><span class="dim">[查看报告]</span></div>
+      <div class="row"><span class="dim">08-28</span><span class="bright">sens 0.94</span><span>score 83.1</span><span class="dim">conf MID</span><span class="dim">[查看报告]</span></div>
+    </div>
+  </div>
+</body>
+</html>

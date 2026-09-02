@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>UI 预览 · 方向 D 复古雷达终端风</title>
+<style>
+  :root {
+    --bg: #030805;
+    --phos: #4ade80;
+    --phos-dim: #86efac99;
+    --line: #1d3b26;
+    --amber: #fbbf24;
+    --ink: #d9f5e0;
+    --dim: #6b9077;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background:
+      repeating-linear-gradient(0deg, rgba(134,239,172,.028) 0 1px, transparent 1px 3px),
+      var(--bg);
+    color: var(--ink);
+    font-family: Consolas, "Courier New", monospace;
+    padding-bottom: 80px;
+  }
+  .page-tag {
+    position: sticky; top: 0; z-index: 9;
+    background: var(--phos); color: #03140a;
+    font-weight: 700; letter-spacing: .25em; padding: 10px 24px; font-size: 14px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 20px; }
+  .screen-label { margin: 48px 0 16px; font-size: 13px; color: var(--amber); letter-spacing: .2em; }
+  .screen-label::before { content: "▚ "; color: var(--phos); }
+
+  .panel { background: rgba(6,20,11,.55); border: 1px solid var(--line); position: relative; }
+  .panel::before {
+    content: attr(data-title);
+    position: absolute; top: -9px; left: 14px;
+    background: var(--bg); padding: 0 8px;
+    font-size: 12px; color: var(--phos); letter-spacing: .25em;
+  }
+
+  /* ── 设置页 ── */
+  .setup { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; padding: 44px 40px 36px; align-items: center; }
+  .eyebrow { color: var(--amber); font-size: 12px; letter-spacing: .3em; margin-bottom: 14px; }
+  h1 { font-size: 33px; line-height: 1.3; letter-spacing: .06em; color: var(--ink); text-shadow: 0 0 16px rgba(74,222,128,.25); }
+  .intro-copy p.sub { color: var(--dim); margin-top: 16px; line-height: 2; font-size: 13.5px; }
+  .chips { display: flex; gap: 8px; margin-top: 22px; flex-wrap: wrap; flex-direction: column; align-items: flex-start; }
+  .chip { font-size: 12.5px; color: var(--phos); letter-spacing: .1em; }
+  .chip::before { content: "[ "; color: var(--line); }
+  .chip::after { content: " ]"; color: var(--line); }
+  form.panel { padding: 30px 26px 26px; display: flex; flex-direction: column; gap: 17px; }
+  label { font-size: 12.5px; color: var(--dim); display: block; letter-spacing: .15em; }
+  input, select {
+    width: 100%; margin-top: 7px; padding: 11px 13px;
+    background: #04120a; border: 1px solid var(--line);
+    color: var(--phos); font-size: 16px; outline: none;
+    font-family: inherit; caret-color: var(--phos);
+  }
+  input:focus, select:focus { border-color: var(--phos); box-shadow: 0 0 12px rgba(74,222,128,.2) inset; }
+  .hint { font-size: 12px; color: var(--amber); margin-top: 5px; letter-spacing: .05em; }
+  .btn {
+    margin-top: 6px; padding: 13px; cursor: pointer;
+    background: var(--phos); border: 1px solid var(--phos); color: #03140a;
+    font-family: inherit; font-size: 15px; font-weight: 700; letter-spacing: .35em;
+  }
+  .fine-print { font-size: 11px; color: #48604f; line-height: 1.7; letter-spacing: .05em; }
+
+  /* ── 测试页 ── */
+  .test-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; font-family: inherit; }
+  .task-name { color: var(--amber); font-size: 12px; letter-spacing: .3em; }
+  .task-desc { font-size: 18px; margin-top: 8px; color: var(--ink); letter-spacing: .1em; }
+  .progress-copy { text-align: right; font-size: 12px; color: var(--dim); letter-spacing: .15em; }
+  .progress-track { width: 220px; height: 8px; background: #0a1a10; border: 1px solid var(--line); margin-top: 8px; }
+  .progress-track i { display: block; height: 100%; width: 40%; background: repeating-linear-gradient(90deg, var(--phos) 0 8px, transparent 8px 12px); }
+  .arena {
+    position: relative; height: 380px; overflow: hidden;
+    background:
+      repeating-radial-gradient(circle at 50% 50%, transparent 0 78px, rgba(74,222,128,.07) 78px 79px),
+      linear-gradient(rgba(74,222,128,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,222,128,.06) 1px, transparent 1px),
+      #02060399, #020603;
+    background-size: auto, 100% 80px, 80px 100%, auto, auto;
+    border: 1px solid var(--line);
+  }
+  .sweep {
+    position: absolute; left: 50%; top: 50%; width: 340px; height: 340px;
+    transform: translate(-50%,-50%);
+    background: conic-gradient(from 0deg, rgba(74,222,128,.12), transparent 70deg);
+    border-radius: 50%; pointer-events: none;
+  }
+  .target {
+    position: absolute; top: 26%; left: 63%;
+    width: 46px; height: 46px; border-radius: 50%;
+    background:
+      radial-gradient(circle, var(--amber) 0 14%, transparent 15%),
+      radial-gradient(circle, transparent 0 38%, var(--amber) 39% 48%, transparent 49%),
+      radial-gradient(circle, transparent 0 72%, var(--amber) 73% 82%, transparent 83%);
+    filter: drop-shadow(0 0 8px rgba(251,191,36,.5));
+  }
+  .crosshair { position: absolute; top: 52%; left: 41%; width: 0; height: 0; }
+  .crosshair::before, .crosshair::after { content: ""; position: absolute; background: var(--phos); box-shadow: 0 0 6px rgba(74,222,128,.7); }
+  .crosshair::before { width: 24px; height: 1.5px; left: -12px; top: -.75px; }
+  .crosshair::after { width: 1.5px; height: 24px; left: -.75px; top: -12px; }
+  .hud { position: absolute; left: 16px; bottom: 14px; display: flex; gap: 10px; font-size: 13px; letter-spacing: .12em; }
+  .hud span { border: 1px solid var(--line); padding: 6px 12px; color: var(--phos-dim); background: rgba(3,8,5,.85); }
+  .hud b { color: var(--amber); }
+
+  /* ── 结果页 ── */
+  .result-heading { padding: 40px 40px 30px; text-align: center; }
+  .big-num { font-size: 68px; color: var(--phos); margin: 10px 0 6px; text-shadow: 0 0 28px rgba(74,222,128,.45); letter-spacing: .04em; }
+  .range-line { color: var(--dim); font-size: 14px; letter-spacing: .1em; }
+  .badge { display: inline-block; margin-left: 8px; padding: 3px 10px; border: 1px solid var(--amber); color: var(--amber); font-size: 12px; letter-spacing: .15em; }
+  .cm360 { font-size: 13px; color: var(--dim); margin-top: 12px; letter-spacing: .08em; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { color: var(--dim); font-weight: 400; font-size: 12px; letter-spacing: .25em; padding: 12px; border-bottom: 1px solid var(--line); }
+  td { padding: 13px 12px; text-align: center; border-bottom: 1px solid #10281a; }
+  td.hl { color: var(--amber); background: rgba(251,191,36,.07); font-weight: 700; text-shadow: 0 0 10px rgba(251,191,36,.4); }
+  td.dash { color: #3a5244; }
+  .actions { display: flex; justify-content: center; gap: 14px; margin-top: 30px; }
+  .btn.secondary { background: none; border: 1px solid var(--line); color: var(--phos); letter-spacing: .25em; padding: 12px 28px; }
+  section.panel { overflow: visible; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="page-tag">方向 D · 复古雷达终端风 —— 静态预览（磷光绿 CRT · 扫描线 · 等宽字体）</div>
+<div class="wrap">
+
+  <div class="screen-label">SCREEN 1/3 :: 设置页 // SETUP</div>
+  <div class="setup">
+    <div class="intro-copy">
+      <p class="eyebrow">// AIM CALIBRATION PROTOCOL</p>
+      <h1>找出更适合你的<br>CS2 灵敏度区间</h1>
+      <p class="sub">先暖手，再通过随机且隐藏档位的两阶段盲测——快速筛选后对最有潜力的档位深度测试。</p>
+      <div class="chips"><span class="chip">5 个候选档位</span><span class="chip">暖手 + 14 轮自适应</span><span class="chip">约 9 分钟</span></div>
+    </div>
+    <form class="panel" data-title="[ SETUP ]">
+      <label>当前 CS2 灵敏度<input value="1.20"></label>
+      <label>DPI（可选）<input value="800"><span class="hint">&gt;&gt; ≈ 43.3 cm 转一圈 (360°)</span></label>
+      <label>CS2 分辨率<select><option>1920 x 1080</option></select></label>
+      <label>非 16:9 显示方式<select><option>拉伸铺满</option></select></label>
+      <button class="btn" type="button">进入测试 ▸▸</button>
+      <p class="fine-print">不会修改系统鼠标设置。测试仅在此浏览器内模拟候选档位。</p>
+    </form>
+  </div>
+
+  <div class="screen-label">SCREEN 2/3 :: 测试页 // STAGE 1 · FLICK</div>
+  <div>
+    <div class="test-head">
+      <div><p class="task-name">// 小目标定位 · 筛选轮</p><p class="task-desc">快速击中出现的小目标</p></div>
+      <div class="progress-copy"><span>阶段 1 ▸ 3 / 5</span><div class="progress-track"><i></i></div></div>
+    </div>
+    <div class="arena">
+      <div class="sweep"></div>
+      <div class="target"></div>
+      <div class="crosshair"></div>
+      <div class="hud"><span>命中 <b>05 / 08</b></span><span>T+03.2S</span></div>
+    </div>
+  </div>
+
+  <div class="screen-label">SCREEN 3/3 :: 结果页 // REPORT</div>
+  <section class="panel" data-title="[ REPORT ]">
+    <div class="result-heading">
+      <p class="eyebrow">// 本次建议 RECOMMENDATION</p>
+      <div class="big-num">1.20</div>
+      <p class="range-line">建议区间 1.06 – 1.34<span class="badge">中置信度</span></p>
+      <p class="cm360">基准 1.20 ≈ 43.3 cm/360° &nbsp;→&nbsp; 推荐 1.20 ≈ 43.3 cm/360°</p>
+    </div>
+    <table>
+      <thead><tr><th>灵敏度</th><th>定位</th><th>跟枪</th><th>反应</th><th>综合分</th></tr></thead>
+      <tbody>
+        <tr><td>0.91</td><td class="dash">62.3</td><td class="dash">--</td><td class="dash">--</td><td class="dash">--</td></tr>
+        <tr><td>1.06</td><td>71.2</td><td>64.5</td><td>66.0</td><td>66.8</td></tr>
+        <tr><td>1.20</td><td class="hl">78.4</td><td class="hl">72.1</td><td class="hl">70.3</td><td class="hl">73.6</td></tr>
+        <tr><td>1.34</td><td>74.9</td><td>69.8</td><td>68.1</td><td>70.9</td></tr>
+        <tr><td>1.49</td><td class="dash">58.1</td><td class="dash">--</td><td class="dash">--</td><td class="dash">--</td></tr>
+      </tbody>
+    </table>
+    <div class="actions">
+      <button class="btn secondary" type="button">再次测试</button>
+      <button class="btn" type="button">导出 JSON ▸▸</button>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

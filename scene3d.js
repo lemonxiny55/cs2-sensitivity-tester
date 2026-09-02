@@ -1,0 +1,484 @@
+// scene3d.js — Three.js 第一人称靶场渲染层。
+// 视角与目标仍以角度(度)为唯一事实来源(app.js 的角度空间状态),本模块只负责把角度画成 3D 世界:
+// 相机朝向 = 视角角;目标 = 方向角 × 距离 处的球体,球体半径由角半径反推。
+// 游戏感层：ACES 色调映射 + 补光、命中/空枪 Sprite 特效池(Canvas 2D 生成贴图,零资产)、目标死亡缩放动画。
+import * as THREE from './vendor/three.module.js';
+
+const DEG2RAD = Math.PI / 180;
+
+// Aimlab 式封闭训练房(扩建版):地板浅灰可见、墙清晰(±30m)、后墙 -40m(最远目标 28m + 余量)。
+const FLOOR_Y = -6;
+const EYE_HEIGHT_M = 1.6;
+
+// 特效常量
+const IMPACT_POOL_SIZE = 24; // Sprite 池上限：连续快速命中也不会卡顿或突增 GPU 对象
+const IMPACT_LIFE_S = 0.32; // 单个特效存活时长(秒)
+const DEATH_ANIM_S = 0.14; // 目标命中后缩放消失时长(秒)
+
+// Canvas 2D 绘制径向渐变圆斑 → CanvasTexture。命中=亮白绿环爆;空枪=暗红弥散。
+function buildImpactTexture({ inner, outer, coreAlpha = 1 }) {
+  const size = 128;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const gradient = ctx.createRadialGradient(size / 2, size / 2, 2, size / 2, size / 2, size / 2);
+  gradient.addColorStop(0, `rgba(${inner}, ${coreAlpha})`);
+  gradient.addColorStop(0.45, `rgba(${outer}, 0.55)`);
+  gradient.addColorStop(1, `rgba(${outer}, 0)`);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+// 细棋盘格纹理(低对比,用于墙/地板):双色方格,安放训练房观感。
+function buildCheckerTexture(base, alt, cells) {
+  const size = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = alt;
+  const cell = size / cells;
+  for (let y = 0; y < cells; y += 1) {
+    for (let x = 0; x < cells; x += 1) {
+      if ((x + y) % 2 === 0) ctx.fillRect(x * cell, y * cell, cell, cell);
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  return texture;
+}
+
+// 菱形花纹纹理(Aimlab 式地板):45° 旋转棋盘,奶油底。
+function buildDiamondTexture(base, alt, cells) {
+  const size = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = alt;
+  const cell = size / cells;
+  for (let y = 0; y < cells; y += 1) {
+    for (let x = 0; x < cells; x += 1) {
+      if ((x + y) % 2 === 0) {
+        ctx.beginPath();
+        ctx.moveTo(x * cell + cell / 2, y * cell);
+        ctx.lineTo((x + 1) * cell, y * cell + cell / 2);
+        ctx.lineTo(x * cell + cell / 2, (y + 1) * cell);
+        ctx.lineTo(x * cell, y * cell + cell / 2);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  return texture;
+}
+
+function buildRoom(scene) {
+  // 配色恢复为经典方案：奶油菱纹地板 + 深色棋盘高墙（几何保持扩建后的尺寸与高度）。
+  scene.add(new THREE.HemisphereLight(0xc4cec8, 0x3a403c, 1.1));
+  const directional = new THREE.DirectionalLight(0xdfeee6, 1.15);
+  directional.position.set(6, 14, 4);
+  scene.add(directional);
+  // 补一盏冷色点光打破平面感(照亮相机近处地板,随距离衰减)。
+  const fill = new THREE.PointLight(0x7de0a2, 14, 45, 2);
+  fill.position.set(-6, 4, -8);
+  scene.add(fill);
+
+  const floorTexture = buildDiamondTexture('#efe9dd', '#e2ddd2', 8);
+  floorTexture.repeat.set(30, 28);
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(64, 60),
+    new THREE.MeshStandardMaterial({ map: floorTexture, color: 0xffffff, roughness: 0.9 }),
+  );
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.set(0, FLOOR_Y, -11);
+  scene.add(floor);
+
+  const grid = new THREE.GridHelper(64, 64, 0x6f7a74, 0x828b85);
+  grid.position.set(0, FLOOR_Y + 0.02, -11);
+  scene.add(grid);
+
+  const axisGeometry = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-30, FLOOR_Y + 0.04, 0),
+    new THREE.Vector3(30, FLOOR_Y + 0.04, 0),
+  ]);
+  scene.add(new THREE.Line(axisGeometry, new THREE.LineBasicMaterial({ color: 0xe24c4b, transparent: true, opacity: 0.5 })));
+
+  // 墙面：恢复深色棋盘（配色回退，保持加高后的单面墙结构）。
+  const wallTexture = buildCheckerTexture('#3d4540', '#4a544e', 16);
+  wallTexture.repeat.set(9, 3);
+  const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture, color: 0xffffff, roughness: 1, side: THREE.DoubleSide });
+  const WALL_H = 24;
+  const WALL_Y = 6;
+  const backWall = new THREE.Mesh(new THREE.PlaneGeometry(60, WALL_H), wallMaterial);
+  backWall.position.set(0, WALL_Y, -40);
+  scene.add(backWall);
+  const frontWall = new THREE.Mesh(new THREE.PlaneGeometry(60, WALL_H), wallMaterial);
+  frontWall.position.set(0, WALL_Y, 18);
+  frontWall.rotation.y = Math.PI;
+  scene.add(frontWall);
+  const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(58, WALL_H), wallMaterial);
+  leftWall.rotation.y = Math.PI / 2;
+  leftWall.position.set(-30, WALL_Y, -11);
+  scene.add(leftWall);
+  const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(58, WALL_H), wallMaterial);
+  rightWall.rotation.y = -Math.PI / 2;
+  rightWall.position.set(30, WALL_Y, -11);
+  scene.add(rightWall);
+  const ceilingMaterial = new THREE.MeshStandardMaterial({ color: 0x2b322e, roughness: 1, side: THREE.DoubleSide });
+  const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(64, 60), ceilingMaterial);
+  ceiling.rotation.x = Math.PI / 2;
+  ceiling.position.set(0, 18, -11);
+  scene.add(ceiling);
+}
+
+export function createRange3d({ container, width, height, vFovDeg }) {
+  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(width, height);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.12;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.domElement.className = 'range-canvas';
+  container.prepend(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0c110e);
+  scene.fog = new THREE.Fog(0x0c110e, 45, 130);
+
+  const camera = new THREE.PerspectiveCamera(vFovDeg, width / height, 0.1, 300);
+  camera.rotation.order = 'YXZ';
+  camera.position.set(0, EYE_HEIGHT_M, 0);
+  scene.add(camera);
+
+  buildRoom(scene);
+
+  const sharedGeometry = new THREE.SphereGeometry(1, 20, 14);
+  const sharedMaterial = new THREE.MeshStandardMaterial({
+    color: 0xe24c4b,
+    roughness: 0.38,
+    metalness: 0.05,
+    emissive: 0x40100f,
+    emissiveIntensity: 0.9,
+  });
+  // 跟枪专用蓝色材质（预建，切换引用零分配）。与命中特效的青绿区分，蓝色=跟住就对了。
+  const trackingMaterial = new THREE.MeshStandardMaterial({
+    color: 0x3b82f6,
+    roughness: 0.35,
+    metalness: 0.05,
+    emissive: 0x0f1f45,
+    emissiveIntensity: 0.9,
+  });
+
+  // 击杀动画材质池:每次击杀 clone() 会分配材质并触发 GPU 上传,连杀时造成 GC/驱动停顿;
+  // 预建透明实例循环借用(死亡动画 0.14s,连杀间隔远大于此,8 个足够),结束时归还。
+  const GHOST_MATERIAL_POOL_SIZE = 8;
+  const ghostMaterialPool = [];
+  function acquireGhostMaterial() {
+    let material = ghostMaterialPool.pop();
+    if (!material) {
+      if (ghostMaterialPool.length >= GHOST_MATERIAL_POOL_SIZE) return sharedMaterial; // 池耗尽时退化共享材质(无淡出但不卡)
+      material = sharedMaterial.clone();
+      material.transparent = true;
+    }
+    material.opacity = 1;
+    return material;
+  }
+  function releaseGhostMaterial(material) {
+    if (material !== sharedMaterial && ghostMaterialPool.length < GHOST_MATERIAL_POOL_SIZE) {
+      ghostMaterialPool.push(material);
+    }
+  }
+
+  // ---- 命中/空枪特效池 ----
+  const hitTexture = buildImpactTexture({ inner: '235, 255, 240', outer: '125, 224, 162' });
+  const missTexture = buildImpactTexture({ inner: '255, 120, 96', outer: '120, 30, 22' });
+  const impactGeometry = new THREE.PlaneGeometry(1, 1);
+  const impacts = []; // { sprite, ageS, lifeS }
+  const pool = [];
+
+  // 跟枪进度条池：同时最多 1 个活动目标，2 个备用足以覆盖换球瞬间的重叠帧。
+  const PROGRESS_POOL_SIZE = 3;
+  const progressWhiteTexture = (() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 2;
+    canvas.height = 2;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 2, 2);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  })();
+  const progressPool = [];
+  function acquireProgressSprite() {
+    let sprite = progressPool.pop();
+    if (!sprite) {
+      if (progressPool.length >= PROGRESS_POOL_SIZE) return null;
+      sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: progressWhiteTexture,
+        color: 0x7de0a2,
+        transparent: true,
+        depthWrite: false,
+        depthTest: false,
+        toneMapped: false,
+      }));
+      sprite.renderOrder = 5;
+      scene.add(sprite);
+    }
+    return sprite;
+  }
+  function releaseProgressSprite(sprite) {
+    sprite.visible = false;
+    if (!progressPool.includes(sprite) && progressPool.length < PROGRESS_POOL_SIZE) progressPool.push(sprite);
+  }
+
+  function acquireImpact(texture) {
+    let sprite = pool.pop();
+    if (!sprite) {
+      if (impacts.length >= IMPACT_POOL_SIZE) return null; // 池满丢弃最旧的由帧循环自然回收
+      sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }));
+      scene.add(sprite);
+    }
+    sprite.material.map = texture;
+    sprite.material.opacity = 1;
+    sprite.visible = true;
+    return sprite;
+  }
+
+  // 在视角方向 distanceM 处生成一发特效;sizeM 为世界尺寸(米)。
+  function spawnImpact(kind, xDeg, yDeg, distanceM, sizeM) {
+    const yaw = xDeg * DEG2RAD;
+    const pitch = yDeg * DEG2RAD;
+    const position = new THREE.Vector3(
+      Math.sin(yaw) * Math.cos(pitch),
+      -Math.sin(pitch),
+      -Math.cos(yaw) * Math.cos(pitch),
+    ).multiplyScalar(distanceM).add(camera.position);
+    const sprite = acquireImpact(kind === 'hit' ? hitTexture : missTexture);
+    if (!sprite) return;
+    sprite.position.copy(position);
+    sprite.scale.setScalar(sizeM);
+    impacts.push({ sprite, ageS: 0, lifeS: IMPACT_LIFE_S, baseScale: sizeM });
+  }
+
+  function updateImpacts(deltaS) {
+    for (let i = impacts.length - 1; i >= 0; i -= 1) {
+      const effect = impacts[i];
+      effect.ageS += deltaS;
+      const t = effect.ageS / effect.lifeS;
+      if (t >= 1) {
+        effect.sprite.visible = false;
+        pool.push(effect.sprite);
+        impacts.splice(i, 1);
+        continue;
+      }
+      // 前半程扩张,全程淡出。
+      const grow = 1 + 0.5 * Math.min(t * 2.4, 1);
+      effect.sprite.scale.setScalar(effect.baseScale * grow);
+      effect.sprite.material.opacity = 1 - t;
+    }
+  }
+
+  const targets = new Map();
+  const dyingTargets = []; // { mesh, ageS }
+  let nextId = 1;
+  let rafId = 0;
+  let lastFrameTime = 0;
+
+  function targetWorldPosition(xDeg, yDeg, distanceM) {
+    const yaw = xDeg * DEG2RAD;
+    const pitch = yDeg * DEG2RAD;
+    return new THREE.Vector3(
+      Math.sin(yaw) * Math.cos(pitch),
+      -Math.sin(pitch),
+      -Math.cos(yaw) * Math.cos(pitch),
+    ).multiplyScalar(distanceM).add(camera.position);
+  }
+
+  function setView(xDeg, yDeg) {
+    camera.rotation.y = -xDeg * DEG2RAD;
+    camera.rotation.x = -yDeg * DEG2RAD;
+  }
+
+  function spawnTarget({ xDeg, yDeg, distanceM, angularHalfDeg, material, withProgressBar = false }) {
+    const radius = distanceM * Math.tan(angularHalfDeg * DEG2RAD);
+    const mesh = new THREE.Mesh(sharedGeometry, material === 'tracking' ? trackingMaterial : sharedMaterial);
+    mesh.scale.setScalar(radius);
+    mesh.position.copy(targetWorldPosition(xDeg, yDeg, distanceM));
+    scene.add(mesh);
+    // 跟枪进度条：1×1 白纹理 sprite 靠 material.color 着色，scale.x 表达进度，
+    // center.x=0 左锚定，每帧只写 scale/position——零纹理重绘、零对象分配。
+    let progressSprite = null;
+    const progressState = { widthM: 0, offsetM: new THREE.Vector3() };
+    if (withProgressBar) {
+      const barHeightM = radius * 0.34;
+      progressState.widthM = radius * 2.6;
+      progressState.offsetM.set(0, radius + barHeightM * 2.2, 0);
+      progressSprite = acquireProgressSprite();
+      progressSprite.material.color.setHex(0x7de0a2);
+      progressSprite.material.opacity = 1;
+      progressSprite.visible = true;
+      const position = targetWorldPosition(xDeg, yDeg, distanceM).add(progressState.offsetM);
+      progressSprite.position.copy(position);
+      progressSprite.scale.set(0.001, barHeightM, 1);
+      progressSprite.center.set(0.5, 0.5);
+    }
+    const handle = {
+      id: nextId,
+      xDeg,
+      yDeg,
+      distanceM,
+      angularHalfDeg,
+      setAngles(nextXDeg, nextYDeg) {
+        handle.xDeg = nextXDeg;
+        handle.yDeg = nextYDeg;
+        mesh.position.copy(targetWorldPosition(nextXDeg, nextYDeg, handle.distanceM));
+        if (progressSprite) {
+          progressSprite.position.copy(mesh.position).add(progressState.offsetM);
+        }
+      },
+      setProgress(t) {
+        if (!progressSprite) return;
+        progressSprite.scale.x = Math.max(t * progressState.widthM, 0.001);
+      },
+      angleFromViewDeg() {
+        const forward = new THREE.Vector3();
+        camera.getWorldDirection(forward);
+        const toTarget = mesh.position.clone().sub(camera.position).normalize();
+        return Math.acos(THREE.MathUtils.clamp(forward.dot(toTarget), -1, 1)) / DEG2RAD;
+      },
+      // 命中击杀动画:借用池中透明材质做缩放淡出,原网格立即让位给下一个目标。
+      killAtView() {
+        if (progressSprite) {
+          releaseProgressSprite(progressSprite);
+          progressSprite = null;
+        }
+        const ghost = new THREE.Mesh(sharedGeometry, acquireGhostMaterial());
+        ghost.scale.setScalar(radius);
+        ghost.position.copy(mesh.position);
+        scene.add(ghost);
+        dyingTargets.push({ mesh: ghost, ageS: 0, baseRadius: radius });
+      },
+    };
+    targets.set(handle.id, { mesh, progressSprite });
+    nextId += 1;
+    return handle;
+  }
+
+  function updateDyingTargets(deltaS) {
+    for (let i = dyingTargets.length - 1; i >= 0; i -= 1) {
+      const entry = dyingTargets[i];
+      entry.ageS += deltaS;
+      const t = entry.ageS / DEATH_ANIM_S;
+      if (t >= 1) {
+        scene.remove(entry.mesh);
+        releaseGhostMaterial(entry.mesh.material);
+        dyingTargets.splice(i, 1);
+        continue;
+      }
+      // 先胀后缩 + 淡出,像被击碎蒸发。
+      const scale = radiusCurve(t);
+      entry.mesh.scale.setScalar(scale * entry.baseRadius);
+      entry.mesh.material.opacity = 1 - t;
+      entry.mesh.material.transparent = true;
+    }
+  }
+
+  function radiusCurve(t) {
+    // 1 → 1.25 → 0 的快脉冲
+    if (t < 0.35) return 1 + 0.7 * t;
+    return Math.max(0, 1.245 - (t - 0.35) * 1.92);
+  }
+
+  function removeTarget(handle) {
+    const entry = targets.get(handle.id);
+    if (!entry) return;
+    scene.remove(entry.mesh);
+    if (entry.progressSprite) releaseProgressSprite(entry.progressSprite);
+    targets.delete(handle.id);
+  }
+
+  function resize(width2, height2) {
+    renderer.setSize(width2, height2);
+    camera.aspect = width2 / height2;
+    camera.updateProjectionMatrix();
+  }
+
+  function frame(time) {
+    const deltaS = lastFrameTime ? Math.min(0.1, (time - lastFrameTime) / 1000) : 0;
+    lastFrameTime = time;
+    updateImpacts(deltaS);
+    updateDyingTargets(deltaS);
+    renderer.render(scene, camera);
+    rafId = requestAnimationFrame(frame);
+  }
+
+  function start() {
+    if (!rafId) {
+      lastFrameTime = 0;
+      rafId = requestAnimationFrame(frame);
+    }
+  }
+
+  function stop() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+
+  function dispose() {
+    stop();
+    for (const [id, entry] of targets) {
+      scene.remove(entry.mesh);
+      if (entry.progressSprite) releaseProgressSprite(entry.progressSprite);
+      targets.delete(id);
+    }
+    for (const sprite of progressPool) {
+      scene.remove(sprite);
+      sprite.material.dispose();
+    }
+    progressPool.length = 0;
+    progressWhiteTexture.dispose();
+    for (const entry of dyingTargets) {
+      scene.remove(entry.mesh);
+      releaseGhostMaterial(entry.mesh.material);
+    }
+    dyingTargets.length = 0;
+    for (const material of ghostMaterialPool) material.dispose();
+    ghostMaterialPool.length = 0;
+    for (const effect of impacts) {
+      effect.sprite.visible = false;
+    }
+    impacts.length = 0;
+    pool.length = 0;
+    sharedGeometry.dispose();
+    sharedMaterial.dispose();
+    trackingMaterial.dispose();
+    hitTexture.dispose();
+    missTexture.dispose();
+    impactGeometry.dispose();
+    renderer.dispose();
+    renderer.domElement.remove();
+  }
+
+  return { domElement: renderer.domElement, setView, spawnTarget, removeTarget, resize, spawnImpact, start, stop, dispose };
+}

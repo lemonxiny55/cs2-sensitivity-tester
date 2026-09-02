@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>方向 1 · 战术电竞风</title>
+<style>
+  :root {
+    --bg: #0c0e0c; --panel: #12151312; --card: #121513; --line: #272d28;
+    --ink: #e8ece8; --dim: #8b948c; --amber: #ffb020; --amber-dim: #6e5111;
+    --ok: #7ad97a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background:
+      repeating-linear-gradient(0deg, transparent 0 2px, rgba(255,255,255,.012) 2px 4px),
+      var(--bg);
+    color: var(--ink);
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+    min-height: 100vh;
+  }
+  .mono { font-family: Consolas, "Courier New", monospace; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* 顶栏 */
+  .topbar { border-bottom: 1px solid var(--line); background: #0a0c0a; }
+  .topbar .wrap { display: flex; align-items: center; gap: 18px; height: 52px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .08em; }
+  .logo i { width: 12px; height: 12px; background: var(--amber); clip-path: polygon(0 0, 100% 0, 100% 60%, 60% 100%, 0 100%); }
+  .topnav { margin-left: auto; display: flex; gap: 22px; font-size: 12px; letter-spacing: .2em; color: var(--dim); }
+  .topnav b { color: var(--ink); font-weight: 600; }
+  .badge { font-size: 11px; letter-spacing: .15em; color: var(--ok); border: 1px solid #2c4430; padding: 3px 8px; }
+
+  /* 主区 */
+  .hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 28px; padding: 44px 0 28px; }
+  .eyebrow { color: var(--amber); font-size: 12px; letter-spacing: .4em; margin-bottom: 14px; }
+  h1 { font-size: 40px; line-height: 1.2; letter-spacing: .02em; }
+  h1 span { color: var(--amber); }
+  .sub { color: var(--dim); margin-top: 16px; line-height: 1.9; font-size: 14px; max-width: 46ch; }
+  .sub b { color: var(--ink); font-weight: 600; }
+
+  .tasklist { margin-top: 26px; border: 1px solid var(--line); background: #0f120f; }
+  .tasklist .head { padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 11px; letter-spacing: .3em; color: var(--dim); display: flex; justify-content: space-between; }
+  .task { display: grid; grid-template-columns: 26px 1fr auto auto; gap: 12px; align-items: center; padding: 11px 14px; border-bottom: 1px solid #1c211d; font-size: 13px; }
+  .task:last-child { border-bottom: none; }
+  .task .idx { color: var(--amber); font-size: 11px; }
+  .task .t { letter-spacing: .06em; }
+  .task .d { color: var(--dim); font-size: 12px; }
+  .task .time { color: var(--amber); font-size: 12px; }
+
+  /* 表单 */
+  .panel { background: #0f120f; border: 1px solid var(--line); position: relative; }
+  .panel::before {
+    content: ""; position: absolute; inset: -1px; pointer-events: none;
+    border-top: 2px solid var(--amber); width: 34px; height: 34px;
+  }
+  .panel .pad { padding: 24px; }
+  .panel-title { font-size: 11px; letter-spacing: .35em; color: var(--dim); margin-bottom: 18px; display: flex; justify-content: space-between; }
+  label { display: block; font-size: 12px; color: var(--dim); letter-spacing: .1em; margin-bottom: 14px; }
+  input, select {
+    width: 100%; margin-top: 7px; padding: 11px 12px; font-size: 15px; outline: none;
+    background: #0b0d0b; border: 1px solid var(--line); color: var(--ink);
+    font-family: Consolas, monospace;
+  }
+  input:focus { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber-dim); }
+  .hint { font-size: 11px; color: #6f7a71; margin-top: 5px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn {
+    width: 100%; margin-top: 8px; padding: 14px; border: none; cursor: pointer;
+    background: var(--amber); color: #171207;
+    font-size: 15px; font-weight: 700; letter-spacing: .3em;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .rawline { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); margin-top: 12px; letter-spacing: .12em; }
+  .rawline b { color: var(--ok); }
+
+  /* 底部记录条 */
+  .history-strip { border-top: 1px solid var(--line); margin-top: 8px; }
+  .history-strip .wrap { display: flex; gap: 14px; align-items: center; padding: 16px 24px; font-size: 13px; }
+  .h-label { color: var(--dim); font-size: 11px; letter-spacing: .3em; }
+  .h-item { display: flex; gap: 10px; align-items: center; border: 1px solid var(--line); padding: 7px 12px; color: var(--dim); }
+  .h-item b { color: var(--ink); }
+  .h-item .score { color: var(--amber); }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="wrap">
+      <div class="logo mono"><i></i>CS2 SENSITIVITY LAB</div>
+      <div class="topnav mono"><b>测试</b><span>历史</span><span>指标说明</span></div>
+      <div class="badge mono">RAW INPUT</div>
+    </div>
+  </div>
+
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow mono">PRECISION BLIND TEST // 盲测协议</div>
+      <h1>找到你的<span>精准灵敏度</span></h1>
+      <p class="sub">围绕你填写的灵敏度生成 <b>5 个隐藏候选档位</b>：先测基准档热手，其余 4 档随机盲测。每档连测 4 类任务，<b>分环节加权记分</b>，二次拟合给出推荐值与建议区间。</p>
+      <div class="tasklist mono">
+        <div class="head"><span>DRILL SEQUENCE</span><span>基准档优先 · 其余随机</span></div>
+        <div class="task"><span class="idx">01</span><span class="t">四目标</span><span class="d">连续定位 · 目标转移</span><span class="time">20s</span></div>
+        <div class="task"><span class="idx">02</span><span class="t">跟枪</span><span class="d">按住左键贴住递减</span><span class="time">20s</span></div>
+        <div class="task"><span class="idx">03</span><span class="t">六目标</span><span class="d">小目标 · 大范围</span><span class="time">20s</span></div>
+        <div class="task"><span class="idx">04</span><span class="t">单球点击</span><span class="d">延迟出现 · 首发精准</span><span class="time">20s</span></div>
+      </div>
+    </div>
+
+    <form class="panel" onsubmit="return false">
+      <div class="pad">
+        <div class="panel-title mono"><span>MISSION SETUP</span><span>装备校准</span></div>
+        <label>基准灵敏度 / SENS<input value="0.821"></label>
+        <label>DPI / 鼠标硬件参数<input value="800"><div class="hint">DPI 由鼠标硬件决定，此处无法修改，仅用于换算 cm/360。</div></label>
+        <div class="row2">
+          <label>分辨率 / RES<select><option>1920 x 1080</option></select></label>
+          <label>显示方式<select><option>保留比例（黑边）</option></select></label>
+        </div>
+        <button class="btn">开始测试</button>
+        <div class="rawline mono"><span>MOUSE RAW INPUT</span><b>● ENABLED</b></div>
+      </div>
+    </form>
+  </div>
+
+  <div class="history-strip">
+    <div class="wrap mono">
+      <span class="h-label">RECENT LOG</span>
+      <div class="h-item"><span>08-29</span><b>0.92</b><span>87.4 分</span><span class="score">置信 高</span><span>查看报告 →</span></div>
+      <div class="h-item"><span>08-28</span><b>0.94</b><span>83.1 分</span><span class="score">置信 中</span><span>查看报告 →</span></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "cs2-sensitivity-tester",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  }
+}

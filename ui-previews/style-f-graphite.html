@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>UI 预览 · 方向 F 石墨单色风</title>
+<style>
+  :root {
+    --bg: #0a0a0c;
+    --ink: #f2f2f0;
+    --dim: #9b9ba1;
+    --faint: #5c5c63;
+    --hairline: rgba(255,255,255,.09);
+    --card: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    --amber: #e8b34b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background:
+      radial-gradient(1000px 480px at 50% -12%, rgba(255,255,255,.07), transparent 60%),
+      var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    padding-bottom: 80px;
+  }
+  .page-tag {
+    position: sticky; top: 0; z-index: 9;
+    background: rgba(10,10,12,.85); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--hairline);
+    color: var(--ink); font-weight: 600; letter-spacing: .06em; padding: 11px 24px; font-size: 14px;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 36px 20px; }
+  .screen-label { margin: 52px 0 18px; font-size: 13px; letter-spacing: .16em; color: var(--faint); display: flex; align-items: center; gap: 12px; }
+  .screen-label::after { content: ""; flex: 1; height: 1px; background: var(--hairline); }
+
+  .panel {
+    background: var(--card); border: 1px solid var(--hairline); border-radius: 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 20px 50px rgba(0,0,0,.45);
+  }
+
+  /* ── 设置页 ── */
+  .setup { display: grid; grid-template-columns: 1.1fr 1fr; gap: 44px; padding: 46px 42px; align-items: center; }
+  .eyebrow { color: var(--dim); font-size: 13px; letter-spacing: .22em; margin-bottom: 14px; }
+  h1 { font-size: 35px; line-height: 1.24; letter-spacing: .01em; font-weight: 650; }
+  .intro-copy p.sub { color: var(--dim); margin-top: 15px; line-height: 1.95; font-size: 14px; }
+  .chips { display: flex; gap: 8px; margin-top: 24px; flex-wrap: wrap; }
+  .chip {
+    border: 1px solid var(--hairline); border-radius: 999px; padding: 6px 13px;
+    font-size: 12.5px; color: var(--dim); background: rgba(255,255,255,.03);
+  }
+  form.panel { padding: 28px 26px; display: flex; flex-direction: column; gap: 16px; }
+  label { font-size: 13px; color: var(--dim); display: block; }
+  input, select {
+    width: 100%; margin-top: 7px; padding: 11px 13px;
+    background: rgba(0,0,0,.42); border: 1px solid var(--hairline);
+    color: var(--ink); font-size: 15px; outline: none; border-radius: 9px;
+    font-family: Consolas, monospace;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.4);
+  }
+  input:focus, select:focus { border-color: rgba(255,255,255,.35); box-shadow: inset 0 1px 3px rgba(0,0,0,.4), 0 0 0 3px rgba(255,255,255,.07); }
+  .hint { font-size: 12px; color: var(--amber); margin-top: 6px; }
+  .btn {
+    margin-top: 6px; padding: 13px; cursor: pointer;
+    background: var(--ink); color: #101013; border: none; border-radius: 9px;
+    font-size: 14.5px; font-weight: 650; letter-spacing: .04em;
+    box-shadow: 0 8px 22px rgba(255,255,255,.08);
+  }
+  .fine-print { font-size: 11.5px; color: #55555c; line-height: 1.7; }
+
+  /* ── 测试页 ── */
+  .test-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px; }
+  .task-name { color: var(--dim); font-size: 13px; letter-spacing: .18em; }
+  .task-desc { font-size: 19px; margin-top: 7px; font-weight: 600; }
+  .progress-copy { text-align: right; font-size: 13px; color: var(--dim); font-family: Consolas, monospace; }
+  .progress-track { width: 230px; height: 3px; background: rgba(255,255,255,.1); margin-top: 9px; border-radius: 99px; }
+  .progress-track i { display: block; height: 100%; width: 40%; background: var(--ink); border-radius: 99px; }
+  .arena {
+    position: relative; height: 400px; overflow: hidden;
+    background:
+      radial-gradient(closest-side at 62% 26%, rgba(255,255,255,.05), transparent),
+      radial-gradient(rgba(255,255,255,.05) 1px, transparent 1.5px),
+      radial-gradient(140% 120% at 50% 110%, rgba(0,0,0,.55), transparent), #060607;
+    background-size: auto, 26px 26px, auto;
+    border: 1px solid var(--hairline); border-radius: 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .target {
+    position: absolute; top: 25%; left: 62%;
+    width: 48px; height: 48px; border-radius: 50%;
+    background:
+      radial-gradient(circle, #ffffff 0 12%, transparent 13%),
+      radial-gradient(circle, transparent 0 40%, rgba(255,255,255,.92) 41% 50%, transparent 51%),
+      radial-gradient(circle, transparent 0 74%, rgba(255,255,255,.55) 75% 84%, transparent 85%);
+    filter: drop-shadow(0 0 14px rgba(255,255,255,.25));
+  }
+  .crosshair { position: absolute; top: 53%; left: 41%; width: 0; height: 0; opacity: .9; }
+  .crosshair::before, .crosshair::after { content: ""; position: absolute; background: var(--ink); border-radius: 2px; }
+  .crosshair::before { width: 22px; height: 1.6px; left: -11px; top: -.8px; }
+  .crosshair::after { width: 1.6px; height: 22px; left: -.8px; top: -11px; }
+  .hud { position: absolute; left: 18px; bottom: 16px; display: flex; gap: 8px; font-family: Consolas, monospace; font-size: 13px; }
+  .hud span {
+    background: rgba(16,16,19,.75); border: 1px solid var(--hairline); border-radius: 8px;
+    padding: 7px 13px; color: var(--dim); backdrop-filter: blur(8px);
+  }
+  .hud b { color: var(--ink); }
+
+  /* ── 结果页 ── */
+  .result-heading { padding: 42px 40px 30px; text-align: center; }
+  .big-num {
+    font-size: 76px; font-family: Consolas, monospace; font-weight: 700; margin: 12px 0 8px; letter-spacing: -.03em;
+    background: linear-gradient(180deg, #fff, #b9b9bf); -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 6px 30px rgba(255,255,255,.15));
+  }
+  .range-line { color: var(--dim); font-size: 14px; }
+  .badge { display: inline-block; margin-left: 8px; padding: 3px 11px; border-radius: 999px; border: 1px solid var(--amber); color: var(--amber); font-size: 12px; }
+  .cm360 { font-family: Consolas, monospace; font-size: 13px; color: var(--faint); margin-top: 13px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  th { color: var(--faint); font-weight: 500; font-size: 12px; letter-spacing: .14em; padding: 12px; border-bottom: 1px solid var(--hairline); }
+  td { padding: 14px 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,.05); font-family: Consolas, monospace; color: var(--dim); }
+  tr:last-child td { border-bottom: none; }
+  tr.hl-row td { background: rgba(255,255,255,.05); color: var(--ink); font-weight: 700; }
+  tr.hl-row td:first-child { border-left: 2px solid var(--ink); border-radius: 2px 0 0 2px; }
+  td.dash { color: #3c3c43; }
+  .actions { display: flex; justify-content: center; gap: 12px; margin-top: 32px; }
+  .btn.secondary {
+    background: none; border: 1px solid var(--hairline); color: var(--ink);
+    padding: 13px 30px; border-radius: 9px; box-shadow: none; font-weight: 550; letter-spacing: .03em;
+  }
+</style>
+</head>
+<body>
+<div class="page-tag">方向 F · 石墨单色风 —— 静态预览（黑白灰层次 · 玻璃卡片 · 唯一琥珀点缀）</div>
+<div class="wrap">
+
+  <div class="screen-label">SCREEN 1 / 3 · 设置页</div>
+  <div class="setup panel">
+    <div class="intro-copy">
+      <p class="eyebrow">个人瞄准校准</p>
+      <h1>找出更适合你的<br>CS2 灵敏度区间</h1>
+      <p class="sub">先暖手，再通过随机且隐藏档位的两阶段盲测——快速筛选后对最有潜力的档位深度测试。</p>
+      <div class="chips"><span class="chip">5 个候选档位</span><span class="chip">暖手 + 14 轮自适应</span><span class="chip">约 9 分钟</span></div>
+    </div>
+    <form>
+      <label>当前 CS2 灵敏度<input value="1.20"></label>
+      <label>DPI（可选）<input value="800"><span class="hint">≈ 43.3 cm 转一圈（360°）</span></label>
+      <label>CS2 分辨率<select><option>1920 x 1080</option></select></label>
+      <label>非 16:9 显示方式<select><option>拉伸铺满</option></select></label>
+      <button class="btn" type="button">进入测试</button>
+      <p class="fine-print">不会修改系统鼠标设置。测试仅在此浏览器内模拟候选档位。</p>
+    </form>
+  </div>
+
+  <div class="screen-label">SCREEN 2 / 3 · 测试页（阶段 1 · 小目标定位）</div>
+  <div>
+    <div class="test-head">
+      <div><p class="task-name">小目标定位 · 筛选轮</p><p class="task-desc">快速击中出现的小目标</p></div>
+      <div class="progress-copy"><span>阶段 1 &nbsp;3 / 5</span><div class="progress-track"><i></i></div></div>
+    </div>
+    <div class="arena">
+      <div class="target"></div>
+      <div class="crosshair"></div>
+      <div class="hud"><span>命中 <b>5 / 8</b></span><span>计时中 03.2s</span></div>
+    </div>
+  </div>
+
+  <div class="screen-label">SCREEN 3 / 3 · 结果页</div>
+  <section class="panel">
+    <div class="result-heading">
+      <p class="eyebrow">本次建议</p>
+      <div class="big-num">1.20</div>
+      <p class="range-line">建议区间 <b style="color:var(--ink)">1.06 – 1.34</b><span class="badge">中置信度</span></p>
+      <p class="cm360">基准 1.20 ≈ 43.3 cm/360° &nbsp;→&nbsp; 推荐 1.20 ≈ 43.3 cm/360°</p>
+    </div>
+    <table>
+      <thead><tr><th>灵敏度</th><th>定位</th><th>跟枪</th><th>反应</th><th>综合分</th></tr></thead>
+      <tbody>
+        <tr><td>0.91</td><td class="dash">62.3</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td></tr>
+        <tr><td>1.06</td><td>71.2</td><td>64.5</td><td>66.0</td><td>66.8</td></tr>
+        <tr class="hl-row"><td>1.20</td><td>78.4</td><td>72.1</td><td>70.3</td><td>73.6</td></tr>
+        <tr><td>1.34</td><td>74.9</td><td>69.8</td><td>68.1</td><td>70.9</td></tr>
+        <tr><td>1.49</td><td class="dash">58.1</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td></tr>
+      </tbody>
+    </table>
+    <div class="actions">
+      <button class="btn secondary" type="button">再次测试</button>
+      <button class="btn" type="button">导出 JSON</button>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

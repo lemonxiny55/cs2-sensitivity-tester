@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>方向 6 · 竞技训练器风格（Aimlabs 路数）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  /* Aimlabs 同路数：近黑底 + 青色强调 + Tungsten 式竞技压缩体（免费替代 Bebas Neue） */
+  :root {
+    --bg: #0f1113; --panel: #17191c; --panel2: #1e2125; --line: #2a2e33;
+    --ink: #f2f4f6; --sub: #b8bfc7; --mute: #7d858e;
+    --teal: #47d8d7; --teal-ink: #062726;
+    --up: #4ad66d; --down: #f85249;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--sub);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 14px; line-height: 1.7;
+  }
+  .disp { font-family: "Bebas Neue", "Arial Narrow", sans-serif; letter-spacing: .03em; font-weight: 400; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
+
+  /* 顶栏 */
+  .top { border-bottom: 1px solid var(--line); }
+  .top .wrap { display: flex; align-items: center; height: 62px; gap: 24px; }
+  .mark { font-family: "Bebas Neue", "Arial Narrow", sans-serif; font-size: 24px; color: #fff; letter-spacing: .06em; display: flex; align-items: center; gap: 12px; }
+  .mark i { width: 10px; height: 22px; background: var(--teal); }
+  .top .meta { margin-left: auto; color: var(--mute); font-size: 13px; display: flex; gap: 24px; }
+  .top .meta b { color: var(--ink); font-weight: 600; }
+
+  /* 主区：左 = 训练列表（launcher 感），右 = 会话设置卡 */
+  .main { display: grid; grid-template-columns: 1.35fr 1fr; gap: 28px; padding: 38px 0 30px; }
+  h1 { font-size: 30px; color: #fff; font-weight: 800; line-height: 1.3; }
+  h1 span { color: var(--teal); }
+  .lead { margin-top: 10px; max-width: 56ch; }
+  .lead b { color: #fff; font-weight: 600; }
+
+  .playlist { margin-top: 24px; }
+  .pl-row {
+    display: grid; grid-template-columns: 44px 1fr auto; gap: 16px; align-items: center;
+    padding: 15px 18px; border: 1px solid var(--line); border-top: none;
+    background: var(--panel); cursor: pointer;
+  }
+  .pl-row:first-child { border-top: 1px solid var(--line); border-radius: 8px 8px 0 0; }
+  .pl-row:last-child { border-radius: 0 0 8px 8px; }
+  .pl-row:hover { background: var(--panel2); }
+  .pl-row.active { background: var(--panel2); box-shadow: inset 3px 0 0 var(--teal); }
+  .pl-idx { font-family: "Bebas Neue", "Arial Narrow", sans-serif; font-size: 20px; color: var(--mute); }
+  .pl-row.active .pl-idx { color: var(--teal); }
+  .pl-name { color: #fff; font-weight: 700; font-size: 15px; }
+  .pl-desc { color: var(--mute); font-size: 12px; margin-top: 2px; }
+  .pl-score { text-align: right; }
+  .pl-score .v { font-family: "Bebas Neue", "Arial Narrow", sans-serif; font-size: 24px; color: #fff; line-height: 1; }
+  .pl-row.active .pl-score .v { color: var(--teal); }
+  .pl-score .u { font-size: 11px; color: var(--mute); }
+
+  /* 右侧会话卡 */
+  .session { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 24px; align-self: start; }
+  .session h2 { font-size: 16px; color: #fff; font-weight: 700; margin-bottom: 18px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; color: var(--mute); margin-bottom: 6px; }
+  .field input, .field select {
+    width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+    color: #fff; font-size: 22px; padding: 8px 12px; outline: none;
+    font-family: "Bebas Neue", "Arial Narrow", sans-serif; letter-spacing: .04em;
+  }
+  .field select { font-size: 14px; font-family: inherit; padding: 10px 12px; color: var(--sub); }
+  .field input:focus, .field select:focus { border-color: var(--teal); }
+  .field .hint { font-size: 11px; color: var(--mute); margin-top: 5px; }
+  .sumrow { display: flex; justify-content: space-between; font-size: 13px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .sumrow:last-of-type { border-bottom: none; }
+  .sumrow b { color: #fff; font-weight: 600; }
+  .start {
+    width: 100%; margin-top: 18px; padding: 15px; border: none; border-radius: 6px; cursor: pointer;
+    background: var(--teal); color: var(--teal-ink);
+    font-size: 17px; font-weight: 800; font-family: inherit; letter-spacing: .2em; text-indent: .2em;
+  }
+  .start:hover { filter: brightness(1.1); }
+
+  /* 底部最近成绩：单行紧凑条 */
+  .recent { border-top: 1px solid var(--line); }
+  .recent .wrap { display: flex; gap: 36px; align-items: center; padding: 16px 32px; font-size: 13px; }
+  .recent .rt { color: var(--mute); font-size: 12px; }
+  .recent .item { display: flex; gap: 10px; align-items: baseline; color: var(--mute); }
+  .recent .item b { color: #fff; font-family: "Bebas Neue", "Arial Narrow", sans-serif; font-size: 18px; letter-spacing: .04em; }
+  .recent .up { color: var(--up); }
+  .recent .down { color: var(--down); }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="wrap">
+      <div class="mark"><i></i>AIMSENSE</div>
+      <div class="meta"><span>灵敏度盲测协议</span><span><b>20s</b> × 4 任务</span><span><b>RAW</b> 原始输入</span></div>
+    </div>
+  </div>
+
+  <div class="wrap main">
+    <div>
+      <h1>找到你的<span>精准灵敏度</span></h1>
+      <p class="lead">围绕你填写的灵敏度生成 <b>5 个隐藏候选档位</b>：先测基准档热手，其余 4 档随机盲测。分环节加权记分，二次拟合给出推荐值。</p>
+
+      <div class="playlist">
+        <div class="pl-row active">
+          <div class="pl-idx">01</div>
+          <div><div class="pl-name">四目标</div><div class="pl-desc">连续定位 · 目标转移</div></div>
+          <div class="pl-score"><div class="v">14</div><div class="u">上次 · 杀</div></div>
+        </div>
+        <div class="pl-row">
+          <div class="pl-idx">02</div>
+          <div><div class="pl-name">跟枪</div><div class="pl-desc">按住左键贴住递减</div></div>
+          <div class="pl-score"><div class="v">7</div><div class="u">上次 · 球</div></div>
+        </div>
+        <div class="pl-row">
+          <div class="pl-idx">03</div>
+          <div><div class="pl-name">六目标</div><div class="pl-desc">小目标 · 大范围散布</div></div>
+          <div class="pl-score"><div class="v">9</div><div class="u">上次 · 杀</div></div>
+        </div>
+        <div class="pl-row">
+          <div class="pl-idx">04</div>
+          <div><div class="pl-name">单球点击</div><div class="pl-desc">延迟出现 · 首发精准</div></div>
+          <div class="pl-score"><div class="v">11</div><div class="u">上次 · 杀</div></div>
+        </div>
+      </div>
+    </div>
+
+    <form class="session" onsubmit="return false">
+      <h2>会话设置</h2>
+      <div class="field">
+        <label>基准灵敏度</label>
+        <input value="0.821">
+      </div>
+      <div class="field">
+        <label>DPI</label>
+        <input value="800">
+        <div class="hint">由鼠标硬件决定，此处无法修改，仅用于换算 cm/360</div>
+      </div>
+      <div class="field">
+        <label>分辨率</label>
+        <select><option>1920 × 1080</option></select>
+      </div>
+      <div class="sumrow"><span>候选档位</span><b>5 个（盲测）</b></div>
+      <div class="sumrow"><span>测试顺序</span><b>基准档先测</b></div>
+      <div class="sumrow"><span>全程时长</span><b>约 11 分钟</b></div>
+      <button class="start">开始训练</button>
+    </form>
+  </div>
+
+  <div class="recent">
+    <div class="wrap">
+      <span class="rt">最近成绩</span>
+      <div class="item"><span>08-29</span><b>0.92</b><span>87.4 分</span><span class="up">▲+4.3</span></div>
+      <div class="item"><span>08-28</span><b>0.94</b><span>83.1 分</span><span class="down">▼−2.1</span></div>
+      <div class="item"><span>08-26</span><b>0.91</b><span>85.2 分</span><span class="up">▲+1.8</span></div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>方向 5 · 数据台版式 × 竞技训练器配色</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* 版式：Leetify 式数据台；配色：Aimlabs 路数——近黑中性底 + 青色品牌强调，绿/红只做涨跌 */
+  :root {
+    --bg: #0f1113; --panel: #17191c; --field: #0c0e10; --line: #2a2e33;
+    --ink: #f2f4f6; --sub: #b8bfc7; --mute: #7d858e;
+    --teal: #47d8d7; --teal-ink: #062726;
+    --up: #4ad66d; --red: #f85249;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--sub);
+    font-family: "Poppins", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 14px; line-height: 1.7;
+  }
+  .num { font-family: "Antonio", "Arial Narrow", sans-serif; letter-spacing: .01em; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
+
+  /* 顶栏：纯文字信息，无徽章 */
+  .top { border-bottom: 1px solid var(--line); }
+  .top .wrap { display: flex; align-items: center; height: 60px; gap: 32px; }
+  .mark { font-family: "Antonio", "Arial Narrow", sans-serif; font-size: 22px; font-weight: 700; color: #fff; letter-spacing: .04em; }
+  .mark i { display: inline-block; width: 8px; height: 16px; background: var(--teal); margin-right: 10px; vertical-align: -2px; }
+  .top .last { margin-left: auto; color: var(--mute); font-size: 13px; }
+  .top .last b { color: #fff; font-weight: 600; }
+  .top .last .up { color: var(--up); }
+
+  /* 主区：左 = 标题句 + 启动器；右 = 流程表 */
+  .main { display: grid; grid-template-columns: 1.25fr 1fr; gap: 48px; padding: 40px 0 36px; }
+  h1 { font-size: 34px; line-height: 1.3; color: #fff; font-weight: 700; letter-spacing: 0; }
+  .lead { margin-top: 14px; max-width: 58ch; }
+  .lead b { color: #fff; font-weight: 600; }
+
+  /* 启动器：一行内联控件，像启动器不像营销表单 */
+  .launcher { margin-top: 28px; border: 1px solid var(--line); background: var(--panel); padding: 18px 20px 16px; border-radius: 4px; }
+  .lrow { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; }
+  .field label { display: block; font-size: 11px; color: var(--mute); margin-bottom: 6px; }
+  .field input, .field select {
+    background: var(--field); border: 1px solid var(--line); border-radius: 3px;
+    color: #fff; font-size: 20px; padding: 6px 10px; width: 110px; outline: none;
+    font-family: "Antonio", "Arial Narrow", sans-serif; letter-spacing: .03em;
+  }
+  .field select { font-size: 14px; font-family: inherit; width: 150px; padding: 10px; color: var(--sub); }
+  .field input:focus, .field select:focus { border-color: var(--teal); }
+  .lnote { font-size: 11px; color: var(--mute); margin-top: 10px; }
+  .lnote b { color: var(--sub); font-weight: 600; font-family: "Antonio", "Arial Narrow", sans-serif; font-size: 12px; letter-spacing: .03em; }
+  .go {
+    margin-left: auto; background: var(--teal); color: var(--teal-ink);
+    border: none; border-radius: 3px; font-size: 15px; font-weight: 700;
+    padding: 11px 34px; cursor: pointer; font-family: inherit;
+  }
+  .go:hover { filter: brightness(1.1); }
+
+  /* 流程表：数据表而不是卡片 */
+  .side h2, .section-title { font-size: 12px; color: var(--mute); font-weight: 500; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; }
+  .flow th, .flow td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .flow th { color: var(--mute); font-weight: 400; font-size: 11px; }
+  .flow td:first-child { color: #fff; font-weight: 600; }
+  .flow td.t { color: var(--sub); }
+  .flow td.w { color: var(--mute); font-family: "Antonio", "Arial Narrow", sans-serif; font-size: 14px; }
+  .flow td.dur { text-align: right; color: #fff; font-family: "Antonio", "Arial Narrow", sans-serif; font-size: 15px; }
+  .flow tr:last-child td { border-bottom: none; }
+  .flow-note { border-top: 1px solid var(--line); margin-top: 2px; padding-top: 10px; color: var(--mute); font-size: 12px; }
+
+  /* 报告速览：上一次测试的核心结论，表格化 */
+  .recap { padding: 4px 0 30px; }
+  .recap-t th, .recap-t td { text-align: left; padding: 8px 36px 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .recap-t th { color: var(--mute); font-weight: 400; font-size: 11px; }
+  .recap-t td.big { font-family: "Antonio", "Arial Narrow", sans-serif; font-size: 24px; color: #fff; }
+  .recap-t td.n { font-family: "Antonio", "Arial Narrow", sans-serif; font-size: 17px; color: var(--ink); }
+  .recap .more { color: var(--mute); font-size: 12px; margin-top: 8px; }
+  .recap .more a { color: var(--sub); text-decoration: none; border-bottom: 1px solid var(--line); }
+  .recap .more a:hover { color: #fff; border-bottom-color: var(--teal); }
+
+  /* 最近记录：密集数据表，分环节得分 + 涨跌 */
+  .history { border-top: 1px solid var(--line); padding: 24px 0 36px; }
+  .hist th, .hist td { text-align: left; padding: 9px 22px 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .hist th { color: var(--mute); font-weight: 400; font-size: 11px; }
+  .hist td.big { font-family: "Antonio", "Arial Narrow", sans-serif; font-size: 19px; color: #fff; }
+  .hist td.seg { font-family: "Antonio", "Arial Narrow", sans-serif; font-size: 15px; color: var(--sub); }
+  .hist .delta-up { color: var(--up); }
+  .hist .delta-down { color: var(--red); }
+  .hist tr:hover td { background: var(--panel); }
+
+  /* 底注：记分规则 + 快捷键 */
+  .foot { color: var(--mute); font-size: 12px; padding: 16px 0 40px; border-top: 1px solid var(--line); }
+  .foot b { color: var(--sub); font-weight: 600; }
+  .foot .keys { margin-top: 4px; }
+  .foot .keys span { border: 1px solid var(--line); border-radius: 3px; padding: 0 6px; font-size: 11px; color: var(--sub); }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="wrap">
+      <div class="mark"><i></i>CS2 SENSLAB</div>
+      <div class="last">上次 08-29 · 推荐 <b class="num">0.92</b> · <b class="num up">87.4</b> 分 · 置信高</div>
+    </div>
+  </div>
+
+  <div class="wrap main">
+    <div>
+      <h1>灵敏度盲测：20 秒 × 4 类任务，<br>找到你的精准灵敏度</h1>
+      <p class="lead">围绕你填写的灵敏度生成 <b>5 个隐藏候选档位</b>，先测基准档热手，其余 4 档随机盲测。分环节加权记分，二次拟合给出推荐值与建议区间。</p>
+
+      <form class="launcher" onsubmit="return false">
+        <div class="lrow">
+          <div class="field">
+            <label>基准灵敏度</label>
+            <input class="num" value="0.821">
+          </div>
+          <div class="field">
+            <label>DPI</label>
+            <input class="num" value="800">
+          </div>
+          <div class="field">
+            <label>分辨率</label>
+            <select><option>1920 × 1080</option></select>
+          </div>
+          <button class="go">开始测试</button>
+        </div>
+        <div class="lnote">本次换算 <b>0.821 @ 800 DPI ≈ 63.3 cm/360</b> · DPI 由鼠标硬件决定，此处无法修改，仅用于换算。</div>
+      </form>
+    </div>
+
+    <div class="side">
+      <h2>测试流程 · 每档连测四项</h2>
+      <table class="flow">
+        <tr><th>任务</th><th>考察</th><th>环节权重</th><th style="text-align:right">时长</th></tr>
+        <tr><td>四目标</td><td class="t">连续定位、目标转移</td><td class="w">30%</td><td class="dur">20s</td></tr>
+        <tr><td>跟枪</td><td class="t">按住左键贴住递减</td><td class="w">15%</td><td class="dur">20s</td></tr>
+        <tr><td>六目标</td><td class="t">小目标、大范围散布</td><td class="w">30%</td><td class="dur">20s</td></tr>
+        <tr><td>单球点击</td><td class="t">延迟出现、首发精准</td><td class="w">25%</td><td class="dur">20s</td></tr>
+      </table>
+      <div class="flow-note">5 个候选档位 · 基准档先测 · 其余随机 · 全程约 11 分钟</div>
+    </div>
+  </div>
+
+  <div class="wrap recap">
+    <div class="section-title">上次报告速览 · 08-29</div>
+    <table class="recap-t">
+      <tr><th>推荐值</th><th>建议区间</th><th>置信度</th><th>四目标最优</th><th>跟枪最优</th><th>六目标最优</th><th>单球最优</th></tr>
+      <tr>
+        <td class="big">0.92</td>
+        <td class="n">0.81 – 1.03</td>
+        <td>高</td>
+        <td class="n">0.92</td>
+        <td class="n">0.92</td>
+        <td class="n">0.94</td>
+        <td class="n">0.92</td>
+      </tr>
+    </table>
+    <div class="more">六目标环节单独 favor 0.94，与综合推荐差 0.02，在拟合区间内 —— <a href="#">查看完整报告 →</a></div>
+  </div>
+
+  <div class="wrap history">
+    <div class="section-title">最近记录</div>
+    <table class="hist">
+      <tr><th>日期</th><th>基准</th><th>推荐值</th><th>四目标</th><th>跟枪</th><th>六目标</th><th>单球</th><th>综合分</th><th>对比上次</th><th>置信度</th></tr>
+      <tr>
+        <td>08-29</td><td class="seg">0.821</td><td class="big">0.92</td>
+        <td class="seg">90.2</td><td class="seg">78.9</td><td class="seg">86.4</td><td class="seg">88.1</td>
+        <td class="big">87.4</td><td class="delta-up">+4.3</td><td>高</td>
+      </tr>
+      <tr>
+        <td>08-28</td><td class="seg">0.821</td><td class="big">0.94</td>
+        <td class="seg">84.0</td><td class="seg">80.2</td><td class="seg">81.7</td><td class="seg">83.5</td>
+        <td class="big">83.1</td><td class="delta-down">−2.1</td><td>中</td>
+      </tr>
+      <tr>
+        <td>08-26</td><td class="seg">0.800</td><td class="big">0.91</td>
+        <td class="seg">86.9</td><td class="seg">79.4</td><td class="seg">83.0</td><td class="seg">85.6</td>
+        <td class="big">85.2</td><td class="delta-up">+1.8</td><td>高</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="wrap foot">
+    <div>记分：<b>击杀数为主轴</b>——点击类按 击杀 50 / 命中率 20 / 精准 15 / 稳定 15，跟枪按 击杀 60 / 精准 25 / 稳定 15；环节权重 四目标 30% · 六目标 30% · 单球 25% · 跟枪 15%，仅基于初测轮次。</div>
+    <div class="keys">鼠标原始输入已启用 · 数据仅保留在本浏览器 · 快捷键：<span>R</span> 重启本轮 <span>ESC</span> 菜单</div>
+  </div>
+</body>
+</html>

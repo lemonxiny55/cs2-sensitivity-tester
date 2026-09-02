@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>方向 3 · 瑞士极简排版风</title>
+<style>
+  :root {
+    --bg: #ffffff; --ink: #111111; --dim: #8a8a8a; --hair: #e6e6e6; --red: #e63329;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif; min-height: 100vh; }
+  .mono { font-family: Consolas, monospace; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 28px; }
+
+  .topbar { border-bottom: 1px solid var(--ink); }
+  .topbar .wrap { display: flex; align-items: baseline; gap: 28px; padding-top: 18px; padding-bottom: 14px; }
+  .logo { font-weight: 700; font-size: 15px; letter-spacing: -.01em; }
+  .topnav { margin-left: auto; display: flex; gap: 24px; font-size: 12px; letter-spacing: .2em; color: var(--dim); }
+  .topnav b { color: var(--ink); }
+  .dot { color: var(--red); }
+
+  .hero { display: grid; grid-template-columns: 1.2fr .8fr; border-bottom: 1px solid var(--hair); }
+  .intro { padding: 56px 0 48px; padding-right: 48px; border-right: 1px solid var(--hair); }
+  .eyebrow { font-size: 12px; letter-spacing: .35em; color: var(--dim); margin-bottom: 22px; }
+  h1 { font-size: 64px; line-height: 1.04; letter-spacing: -.025em; font-weight: 700; }
+  h1 .rd { color: var(--red); }
+  .sub { margin-top: 26px; font-size: 15px; line-height: 1.9; color: #444; max-width: 50ch; }
+  .sub b { color: var(--ink); }
+
+  .tasks { margin-top: 34px; border-top: 1px solid var(--ink); }
+  .task { display: grid; grid-template-columns: 50px 1fr auto; gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--hair); font-size: 14px; align-items: baseline; }
+  .task .no { color: var(--dim); font-size: 11px; }
+  .task .t { font-weight: 600; }
+  .task .d { color: var(--dim); font-size: 12px; margin-left: 12px; font-weight: 400; }
+  .task .time { font-size: 12px; color: var(--ink); }
+
+  .setup { padding: 56px 0 48px 48px; }
+  .setup-title { font-size: 12px; letter-spacing: .3em; color: var(--dim); margin-bottom: 24px; }
+  label { display: block; font-size: 12px; letter-spacing: .15em; color: var(--dim); margin-bottom: 22px; }
+  input, select {
+    width: 100%; margin-top: 8px; padding: 4px 0 10px; font-size: 22px; outline: none;
+    border: none; border-bottom: 2px solid var(--ink); border-radius: 0; background: transparent; color: var(--ink);
+    font-family: Consolas, monospace;
+  }
+  input:focus { border-bottom-color: var(--red); }
+  select { font-size: 15px; padding: 8px 0; }
+  .hint { font-size: 11px; color: var(--dim); margin-top: 6px; letter-spacing: .02em; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .btn {
+    width: 100%; margin-top: 14px; padding: 16px; cursor: pointer;
+    background: var(--ink); color: #fff; border: none; font-size: 14px; letter-spacing: .4em; text-indent: .4em; font-weight: 600;
+  }
+  .btn:hover { background: var(--red); }
+  .rawline { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); margin-top: 14px; letter-spacing: .1em; }
+  .rawline b { color: var(--ink); }
+
+  .history-strip { border-bottom: 1px solid var(--hair); }
+  .history-strip .wrap { display: flex; gap: 40px; align-items: baseline; padding: 20px 28px; }
+  .h-label { font-size: 11px; letter-spacing: .3em; color: var(--dim); }
+  .h-item { display: flex; gap: 14px; align-items: baseline; font-size: 13px; color: var(--dim); }
+  .h-item b { color: var(--ink); font-size: 16px; }
+  .h-item .score { color: var(--red); }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="wrap">
+      <div class="logo">CS2 灵敏度实验室<span class="dot">.</span></div>
+      <div class="topnav"><b>测试</b><span>历史</span><span>指标说明</span></div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="wrap intro">
+      <div class="eyebrow">精准灵敏度盲测工具</div>
+      <h1>找到你的<br>精准灵敏度<span class="rd">.</span></h1>
+      <p class="sub">围绕你填写的灵敏度生成 <b>5 个隐藏候选档位</b>：先测基准档热手，其余 4 档随机盲测。每档连测 4 类任务，<b>分环节加权记分</b>，二次拟合给出推荐值与建议区间。</p>
+      <div class="tasks">
+        <div class="task"><span class="no mono">01</span><span class="t">四目标<span class="d">连续定位 · 目标转移</span></span><span class="time mono">20s</span></div>
+        <div class="task"><span class="no mono">02</span><span class="t">跟枪<span class="d">按住左键贴住递减</span></span><span class="time mono">20s</span></div>
+        <div class="task"><span class="no mono">03</span><span class="t">六目标<span class="d">小目标 · 大范围</span></span><span class="time mono">20s</span></div>
+        <div class="task"><span class="no mono">04</span><span class="t">单球点击<span class="d">延迟出现 · 首发精准</span></span><span class="time mono">20s</span></div>
+      </div>
+    </div>
+
+    <form class="wrap setup" onsubmit="return false">
+      <div class="setup-title">装备校准 / SETUP</div>
+      <label>基准灵敏度<input value="0.821"></label>
+      <label>DPI<div class="hint">DPI 由鼠标硬件决定，此处无法修改，仅用于换算 cm/360。</div><input value="800"></label>
+      <div class="row2">
+        <label>分辨率<select><option>1920 x 1080</option></select></label>
+        <label>显示方式<select><option>保留比例（黑边）</option></select></label>
+      </div>
+      <button class="btn">开始测试</button>
+      <div class="rawline"><span>鼠标原始输入</span><b>已启用 ●</b></div>
+    </form>
+  </div>
+
+  <div class="history-strip">
+    <div class="wrap">
+      <span class="h-label">最近记录</span>
+      <div class="h-item"><b>0.92</b><span>87.4 分</span><span class="score">置信 高</span><span>08-29</span></div>
+      <div class="h-item"><b>0.94</b><span>83.1 分</span><span class="score">置信 中</span><span>08-28</span></div>
+    </div>
+  </div>
+</body>
+</html>

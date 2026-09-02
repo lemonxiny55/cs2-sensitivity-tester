@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CS2 灵敏度实验室</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+      .pause-overlay[hidden] { display: none; }
+      .game-mode .app-shell { max-width: none; padding: 0; }
+      .game-mode .topbar, .game-mode .test-header { display: none; }
+      .game-mode .test-screen { position: fixed; inset: 0; display: block; height: 100vh; padding: 0; overflow: hidden; background: #020403; }
+      .game-mode .arena { position: absolute; top: 50%; left: 50%; width: var(--game-width); height: var(--game-height); max-width: none; transform: translate(-50%, -50%) scale(var(--game-scale-x), var(--game-scale-y)); transform-origin: center; box-shadow: none; }
+    </style>
+  </head>
+  <body>
+    <div id="boot-warning" class="boot-warning" hidden>页面脚本未能加载。直接双击 index.html 会被浏览器拦截（file:// 不允许加载模块脚本），请双击 <b>start.cmd</b> 一键启动，或访问 <b>http://127.0.0.1:4173</b>。</div>
+    <main class="app-shell">
+      <header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">CS</span><div><a class="wordmark" href="index.html">CS2 <span>灵敏度实验室</span></a><p class="brand-sub">精准灵敏度盲测工具</p></div></div><nav class="topbar-nav"><a class="pill-link" href="#landing-history" title="查看本地测试记录">测试历史</a><a class="pill-link" href="https://github.com" target="_blank" rel="noreferrer" title="0.022°/count 真实标定 · 本地运行不上传任何数据">数据说明</a></nav></header>
+      <section data-screen="setup" class="landing">
+        <div class="wrap main-grid">
+          <div class="intro">
+            <h1>灵敏度盲测：20 秒 × 4 类任务，<br>找到你的精准灵敏度</h1>
+            <p class="lead">围绕你填写的灵敏度生成 <b>5 个隐藏候选档位</b>，先测基准档热手，其余 4 档随机盲测。分环节加权记分，二次拟合给出推荐值与建议区间。</p>
+            <form id="setup-form" class="launcher">
+              <div class="lrow">
+                <div class="field"><label for="sensitivity">基准灵敏度</label><input id="sensitivity" inputmode="decimal" placeholder="例如 1.20" required></div>
+                <div class="field field-dpi">
+                  <label for="dpi">DPI</label>
+                  <input id="dpi" inputmode="numeric" placeholder="例如 800">
+                  <div class="field-note"><span id="cm-hint" class="cm-hint"></span>DPI 由鼠标硬件决定，此处无法修改，仅用于换算 cm/360。</div>
+                </div>
+                <div class="field"><label for="resolution">分辨率</label><select id="resolution"><optgroup label="4:3"><option value="1024x768">1024 x 768</option><option value="1280x960">1280 x 960</option><option value="1440x1080">1440 x 1080</option></optgroup><optgroup label="5:4"><option value="1280x1024">1280 x 1024</option></optgroup><optgroup label="16:9"><option value="1280x720">1280 x 720</option><option value="1600x900">1600 x 900</option><option value="1920x1080" selected>1920 x 1080</option><option value="2560x1440">2560 x 1440</option></optgroup><optgroup label="16:10"><option value="1280x800">1280 x 800</option><option value="1440x900">1440 x 900</option><option value="1680x1050">1680 x 1050</option><option value="1728x1080">1728 x 1080</option></optgroup></select></div>
+                <button id="start-test" class="go" type="button">开始测试</button>
+              </div>
+              <div class="sub-row">
+                <div class="field field-compact"><label for="display-mode">显示方式</label><select id="display-mode"><option value="letterbox">保留比例（黑边）</option><option value="stretch">拉伸铺满</option></select></div>
+                <fieldset class="audio-settings"><legend>训练音效</legend><label class="audio-toggle"><input id="audio-enabled" type="checkbox" checked> 启用</label><label>射击<input id="fire-volume" type="range" min="0" max="100" value="50"></label><label>命中<input id="hit-volume" type="range" min="0" max="100" value="70"></label></fieldset>
+                <div class="raw-input-row"><span>鼠标原始输入</span><b id="raw-input-status" class="raw-badge pending">待检测 · 开始测试时自动检测</b></div>
+              </div>
+            </form>
+            <p class="fine-print">不会修改系统鼠标设置，全部数据仅保留在本浏览器。</p>
+          </div>
+          <aside class="side">
+            <h2>测试流程 · 每档连测四项</h2>
+            <table class="flow">
+              <tr><th>任务</th><th>考察</th><th>环节权重</th><th style="text-align:right">时长</th></tr>
+              <tr class="task-quad"><td>四目标</td><td class="t">连续定位、目标转移</td><td class="w">30%</td><td class="dur">20s</td></tr>
+              <tr class="task-track"><td>跟枪</td><td class="t">按住左键贴住递减</td><td class="w">15%</td><td class="dur">20s</td></tr>
+              <tr class="task-hex"><td>六目标</td><td class="t">小目标、大范围散布</td><td class="w">30%</td><td class="dur">20s</td></tr>
+              <tr class="task-single"><td>单球点击</td><td class="t">延迟出现、首发精准</td><td class="w">25%</td><td class="dur">20s</td></tr>
+            </table>
+            <div class="flow-note">5 个候选档位 · 基准档先测 · 其余随机 · 全程约 8 分钟（数据存疑时自动加测一轮）</div>
+            <p id="landing-stats" class="landing-stats-line">尚未开始测试</p>
+          </aside>
+        </div>
+        <div class="wrap recap" id="landing-recap" hidden>
+          <div class="recap-head"><div class="section-title-text" id="recap-title">上次报告速览</div><button id="landing-clear-history" class="icon-button" title="清除全部历史" aria-label="清除全部历史">×</button></div>
+          <table class="recap-t">
+            <tr><th>推荐值</th><th>建议区间</th><th>置信度</th><th>四目标最优</th><th>跟枪最优</th><th>六目标最优</th><th>单球最优</th></tr>
+            <tr><td class="big" id="recap-recommended">—</td><td class="n" id="recap-range">—</td><td id="recap-confidence">—</td><td class="n" id="recap-quad">—</td><td class="n" id="recap-tracking">—</td><td class="n" id="recap-hex">—</td><td class="n" id="recap-single">—</td></tr>
+          </table>
+          <div class="more" id="recap-note"></div>
+        </div>
+        <div class="wrap history-sec" id="landing-history">
+          <div class="recap-head"><div class="section-title-text">最近记录</div><span class="fine-print">点击任意记录可打开当次完整报告</span></div>
+          <div id="landing-history-list" class="history-list landing-history-list"></div>
+        </div>
+        <footer class="wrap foot">
+          <div>记分：<b>绝对分，跨场次可比</b>——点击类 = 击杀 × 10 × √命中率 × 停点系数（停点越贴目标圆心越高），跟枪 = 球数 × 20 × 贴迹系数；环节权重 四目标 30% · 六目标 30% · 单球 25% · 跟枪 15%，仅基于初测轮次。</div>
+          <div class="keys">鼠标移动瞄准 <span class="keycap">左键</span> 射击 · <span class="keycap">ESC</span> 菜单 · 鼠标原始输入已启用</div>
+        </footer>
+      </section>
+      <section data-screen="test" hidden class="test-screen"><div class="test-header"><div><p id="task-name" class="eyebrow"></p><h2 id="task-description"></h2></div><div class="progress-copy"><span id="progress"></span><div class="progress-track"><i id="progress-bar"></i></div></div></div><div id="arena" class="arena" tabindex="0"><div id="crosshair" class="crosshair" aria-hidden="true"></div><div class="hud"><span>命中 <b id="stat-hits"></b></span><span id="stat-time"></span><span id="stat-fps" class="stat-fps"></span></div><div id="pause-overlay" class="pause-overlay" hidden><div><p id="pause-message"></p><button class="button primary" type="button">继续测试</button></div></div></div><div id="calibration-bar" class="calibration-bar"></div></section>
+      <section data-screen="results" hidden class="results-screen"><div class="result-heading"><p class="eyebrow">本次建议</p><h1><span id="recommended">-</span></h1><p>建议区间 <b id="range">-</b> <span id="confidence" class="badge"></span></p><p id="cm360" class="cm360"></p><p id="retest-note" hidden></p><p id="fit-note" class="fine-print"></p><p id="retest" class="caution" hidden>本次各档差异不明显或峰值处于区间边缘，建议休息后再测一次确认。</p></div><div class="result-grid"><section><h2>候选对比</h2><div class="table-wrap"><table><thead><tr id="results-head-row"></tr></thead><tbody id="results-body"></tbody></table></div><p id="per-type-note" class="per-type-note" hidden></p><p class="fine-print">四目标 / 跟枪 / 六目标 / 单球点击 为各类任务内的单独排序，每列优选值已高亮；综合分仅基于初测轮次，每个档位都有四项完整数据；旧版本记录未深测的档位可能显示 —，且其分数为旧版相对分口径，与新绝对分不可直接比较。</p><h2>拉枪分析</h2><div class="table-wrap"><table><thead><tr><th>灵敏度</th><th>启动延迟</th><th>方向倾向</th><th>真实过冲</th><th>真实欠冲</th><th>首发命中</th><th>微调幅度</th><th>微调准确</th><th>路径效率</th></tr></thead><tbody id="flick-analysis-body"></tbody></table></div><div id="flick-curve" class="flick-curve" hidden></div><p class="fine-print">启动延迟：目标出现到准星开始移动（≥127°/s）；方向倾向与真实过冲/欠冲按目标角半径归一化停点，目标内的正常停点波动不计入；微调幅度：首次定位后到完成击杀的额外修正；路径效率：直线距离 ÷ 实际轨迹长度；首发命中：转向新目标后的第一枪命中率；微调准确：空枪后补枪收尾的比例。各指标的完整口径见下方“指标说明”。</p><details class="metric-help"><summary>指标说明：每个数字怎么算、怎么看</summary><dl><dt>综合分</dt><dd>绝对分，锚点固定、跨场次可比：每轮 20 秒，点击类得分 = 击杀 × 10 × √命中率 × 停点系数（√ 命中惩罚脱靶但不鼓励蹲命中率；停点系数看准星停在目标圆心多近，来自拉枪轨迹分析），跟枪 = 球数 × 20 × 贴迹系数；再按 四目标 30% / 六目标 30% / 单球 25% / 跟枪 15% 加权合成，仅基于初测轮次。</dd><dt>四目标 / 跟枪 / 六目标 / 单球点击列</dt><dd>各类任务内部单独排序，列内最优值高亮；四目标考连续定位节奏，跟枪需按住左键贴住目标条才递减、看有效贴住时长与偏离幅度，六目标考小目标精准度，单球点击看出现到点击的耗时。</dd><dt>推荐值与区间</dt><dd>推荐值只取实测过的档位（得分曲线的拟合峰值仅用于建议区间与参考说明）；初测自洽（分差明显、各环节指向一致）时跳过复测直接出结果，峰值贴边或各档差距不明显时自动加测前二名做确认。</dd><dt>置信度</dt><dd>综合头名差距、峰值是否在区间内部、高分区平坦度（plateau）给出高/中/低；低置信度说明各档手感接近，区分度有限。</dd><dt>启动延迟</dt><dd>目标出现到准星开始朝目标移动（≥127°/s）的时间，反映“看到 → 动手”的速度。</dd><dt>方向倾向</dt><dd>只统计每个目标的首次定位，停点按目标角半径归一化后分五级（明显欠冲 → 明显过冲）；近距离大目标不会被天然放大。</dd><dt>真实过冲 / 欠冲</dt><dd>只有越过目标边界后明显回拉，或停在边界外造成空枪才计入；目标内的正常停点波动不算。</dd><dt>首发命中</dt><dd>每次转向新目标后的第一枪是否命中，反映首次定位质量。</dd><dt>微调幅度 / 微调准确</dt><dd>微调幅度是首次定位后为完成击杀额外修正的角度路径；微调准确是出现空枪后成功补枪收尾的比例。</dd><dt>路径效率</dt><dd>起点到目标的直线距离 ÷ 实际轨迹长度，越接近 100% 越直接，绕行和反复修正会拉低。</dd><dt>速度曲线</dt><dd>推荐档某一轮的准星角速度：加速段 → 峰值 → 减速与停点；点击前 50ms 均速 ≤8°/s 视为停点。</dd><dt>1% low</dt><dd>最差 1% 帧的平均帧率。平均值会被时长稀释，1% low 与最大单帧更能暴露卡顿；任一不达标的轮次会自动重测一次。</dd></dl></details></section><section><div class="section-title"><h2>本地历史</h2><button id="clear-history" class="icon-button" title="清除全部历史" aria-label="清除全部历史">×</button></div><p class="fine-print">点击任意记录可打开当次完整报告。</p><p id="history-aggregate" class="history-aggregate"></p><div id="history-chart" class="history-chart"></div><p id="history-trend" class="history-trend"></p><div id="history-list" class="history-list"></div></section></div><div class="result-actions"><button id="restart" class="button secondary">再次测试</button><button id="view-report" class="button secondary">查看完整报告</button><button id="export-history" class="button primary">导出 JSON</button></div></section>
+<section data-screen="report" hidden class="report-screen"><div class="report-topbar"><button id="report-back" class="button secondary">← 返回</button><div class="report-topbar-right"><button id="report-delete" class="button danger" title="从本地历史中删除这一条记录">删除此记录</button><span class="fine-print">报告数据来自本地存档，可随时回看</span></div></div><div class="result-heading"><p class="eyebrow">测试报告</p><h1><span id="report-recommended">-</span></h1><p>建议区间 <b id="report-range">-</b> <span id="report-confidence" class="badge"></span> <span id="report-agreement" class="badge" hidden></span></p><p id="report-meta" class="cm360"></p></div><div class="result-grid"><section><h2>候选对比（初测）</h2><div class="table-wrap"><table><thead><tr id="report-head-row"></tr></thead><tbody id="report-results-body"></tbody></table></div><h2>拉枪分析</h2><div class="table-wrap"><table><thead><tr><th>灵敏度</th><th>启动延迟</th><th>方向倾向</th><th>真实过冲</th><th>真实欠冲</th><th>首发命中</th><th>微调幅度</th><th>微调准确</th><th>路径效率</th></tr></thead><tbody id="report-flick-body"></tbody></table></div></section><section><h2>复测确认</h2><div id="report-retest" class="retest-card"></div><h2>逐轮明细</h2><details class="round-log"><summary id="report-rounds-count">展开全部轮次</summary><div class="table-wrap"><table><thead><tr><th>阶段</th><th>任务</th><th>灵敏度</th><th>命中</th><th>用时</th><th>精准</th><th>稳定</th></tr></thead><tbody id="report-rounds-body"></tbody></table></div></details><p class="fine-print">精准 = 准星到目标的平均角距（按目标角半径归一化，越低越好）；稳定 = 各次命中耗时的波动。逐轮数据与导出的 JSON 一致。</p></section></div></section>
+    </main>
+    <div id="toast" class="toast" hidden role="status"></div>
+    <script>
+      // 兜底脚本：即使 app.js 因 file:// 拦截而没加载，也不让表单原生提交刷新页面，并给出提示。
+      window.__cs2booted = false;
+      document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('setup-form');
+        if (form) form.addEventListener('submit', function (e) { e.preventDefault(); });
+        setTimeout(function () {
+          if (window.__cs2booted) return;
+          var banner = document.getElementById('boot-warning');
+          if (banner) banner.hidden = false;
+        }, 900);
+      });
+    </script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>方向 2 · 军规仪表风</title>
+<style>
+  :root {
+    --bg: #1e231a; --panel: #272e21; --panel2: #30382a; --line: #4a5240;
+    --ink: #dcd6bb; --dim: #99a088; --accent: #e8862e; --stencil: #b7bfa2;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: "Microsoft YaHei", "Segoe UI", sans-serif; min-height: 100vh; }
+  .mono { font-family: Consolas, monospace; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  .topbar { border-bottom: 3px double var(--line); background: var(--panel); }
+  .topbar .wrap { display: flex; align-items: center; gap: 16px; height: 58px; }
+  .plate {
+    background: var(--stencil); color: #22271c; font-weight: 800; letter-spacing: .18em;
+    padding: 5px 14px; font-size: 14px; clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  }
+  .topmeta { margin-left: auto; display: flex; gap: 18px; font-size: 12px; color: var(--dim); letter-spacing: .12em; }
+  .topmeta b { color: var(--accent); }
+
+  .frame { border: 2px solid var(--line); outline: 1px solid #39412f; outline-offset: 3px; margin: 34px 0; background: var(--panel); }
+  .frame-head {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 2px solid var(--line); padding: 10px 18px;
+    font-size: 12px; letter-spacing: .3em; color: var(--stencil);
+  }
+  .frame-head .rec { color: var(--accent); }
+
+  .hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 0; }
+  .intro { padding: 34px 30px; border-right: 2px solid var(--line); }
+  .eyebrow { color: var(--dim); font-size: 12px; letter-spacing: .4em; margin-bottom: 14px; }
+  h1 { font-size: 36px; line-height: 1.25; letter-spacing: .12em; font-weight: 800; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .sub { color: var(--dim); margin-top: 16px; line-height: 1.9; font-size: 14px; }
+  .sub b { color: var(--ink); }
+
+  .modules { margin-top: 24px; border: 1px solid var(--line); }
+  .module { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; border-bottom: 1px solid var(--line); }
+  .module:last-child { border-bottom: none; }
+  .module .no {
+    padding: 12px 0; text-align: center; font-weight: 800; color: #232a1b; background: var(--stencil);
+    border-right: 1px solid var(--line); font-size: 16px;
+  }
+  .module .body { padding: 10px 16px; }
+  .module .t { letter-spacing: .2em; font-weight: 700; font-size: 14px; }
+  .module .d { color: var(--dim); font-size: 12px; margin-top: 3px; }
+  .module .t20 { padding: 0 16px; color: var(--accent); font-size: 13px; letter-spacing: .1em; }
+
+  .setup { padding: 30px; background: var(--panel2); }
+  .setup-title { font-size: 12px; letter-spacing: .35em; color: var(--stencil); margin-bottom: 20px; display: flex; justify-content: space-between; }
+  label { display: block; font-size: 12px; color: var(--dim); letter-spacing: .15em; margin-bottom: 16px; }
+  input, select {
+    width: 100%; margin-top: 7px; padding: 12px 12px; font-size: 16px; outline: none;
+    background: #1b2015; border: 2px solid var(--line); color: var(--ink);
+    font-family: Consolas, monospace;
+  }
+  input:focus { border-color: var(--accent); }
+  .hint { font-size: 11px; color: #7d846c; margin-top: 5px; letter-spacing: .05em; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn {
+    width: 100%; margin-top: 10px; padding: 15px; cursor: pointer;
+    background: var(--accent); color: #241505; border: none;
+    font-size: 16px; font-weight: 800; letter-spacing: .5em; text-indent: .5em;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .gauge { margin-top: 16px; height: 10px; border: 1px solid var(--line); background: repeating-linear-gradient(90deg, #39412f 0 2px, transparent 2px 8px); position: relative; }
+  .gauge i { position: absolute; left: 0; top: 0; bottom: 0; width: 38%; background: var(--accent); opacity: .85; }
+  .rawline { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); margin-top: 12px; letter-spacing: .15em; }
+  .rawline b { color: var(--stencil); }
+
+  .history-strip { border-top: 2px solid var(--line); background: var(--panel); }
+  .history-strip .wrap { display: flex; gap: 14px; align-items: center; padding: 15px 24px; font-size: 13px; }
+  .h-label { color: var(--dim); font-size: 11px; letter-spacing: .3em; }
+  .h-item { display: flex; gap: 10px; align-items: center; border: 1px solid var(--line); background: var(--panel2); padding: 7px 12px; color: var(--dim); }
+  .h-item b { color: var(--ink); }
+  .h-item .score { color: var(--accent); }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="wrap">
+      <div class="plate">CS2 灵敏度标定仪</div>
+      <div class="topmeta mono"><span>协议 BLIND-5</span><span>轮次 <b>20s × 4</b></span><span>输入 <b>RAW</b></span></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="frame">
+      <div class="frame-head mono"><span>SECTION 01 · 装备校准与任务简报</span><span class="rec">● STANDBY</span></div>
+      <div class="hero-grid">
+        <div class="intro">
+          <div class="eyebrow">精准灵敏度盲测工具</div>
+          <h1>找到你的<em>精准灵敏度</em></h1>
+          <p class="sub">围绕你填写的灵敏度生成 <b>5 个隐藏候选档位</b>：先测基准档热手，其余 4 档随机盲测。每档连测 4 类任务，<b>分环节加权记分</b>，二次拟合给出推荐值与建议区间。</p>
+          <div class="modules mono">
+            <div class="module"><div class="no">01</div><div class="body"><div class="t">四目标</div><div class="d">连续定位 · 目标转移</div></div><div class="t20">20 SEC</div></div>
+            <div class="module"><div class="no">02</div><div class="body"><div class="t">跟枪</div><div class="d">按住左键贴住递减</div></div><div class="t20">20 SEC</div></div>
+            <div class="module"><div class="no">03</div><div class="body"><div class="t">六目标</div><div class="d">小目标 · 大范围</div></div><div class="t20">20 SEC</div></div>
+            <div class="module"><div class="no">04</div><div class="body"><div class="t">单球点击</div><div class="d">延迟出现 · 首发精准</div></div><div class="t20">20 SEC</div></div>
+          </div>
+        </div>
+
+        <form class="setup" onsubmit="return false">
+          <div class="setup-title mono"><span>标定参数</span><span>CALIBRATION</span></div>
+          <label>基准灵敏度<input value="0.821"></label>
+          <label>DPI<div class="hint" style="margin:6px 0 0">DPI 由鼠标硬件决定，此处无法修改，仅用于换算 cm/360。</div><input value="800"></label>
+          <div class="row2">
+            <label>分辨率<select><option>1920 x 1080</option></select></label>
+            <label>显示方式<select><option>保留比例（黑边）</option></select></label>
+          </div>
+          <button class="btn">启动测试序列</button>
+          <div class="gauge"><i></i></div>
+          <div class="rawline mono"><span>鼠标原始输入</span><b>已启用 · RAW ENABLED</b></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="history-strip">
+    <div class="wrap mono">
+      <span class="h-label">历史档案</span>
+      <div class="h-item"><span>08-29</span><b>0.92</b><span>87.4 分</span><span class="score">置信 高</span><span>调取报告 →</span></div>
+      <div class="h-item"><span>08-28</span><b>0.94</b><span>83.1 分</span><span class="score">置信 中</span><span>调取报告 →</span></div>
+    </div>
+  </div>
+</body>
+</html>
