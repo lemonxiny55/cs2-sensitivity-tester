@@ -1,0 +1,990 @@
+/* ==========================================================================
+   RANGE OS · 靶场座舱 — concepts/range-os/styles.css
+   契约: /DESIGN.md §2.3(--ro-) §3.3 §4.1/§4.4 §5.0/§5.1 §6 §7C §8
+   纯静态视觉原型:无脚本、无产品功能。所有颜色字面量只允许出现在 :root。
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Tokens
+   -------------------------------------------------------------------------- */
+:root {
+  /* §2.3 C · Range OS 调色板(表内值) */
+  --ro-canvas: #05080C;
+  --ro-canvas-mid: #0A1119;   /* 径向渐亮向中心的亮端,§2.3 画布行注明 */
+  --ro-hull: #0C141D;
+  --ro-hull-hi: #131E2A;
+  --ro-text: #DDE6EE;
+  --ro-text-2: #8FA1B3;
+  --ro-cyan: #6FE3F5;
+  --ro-cyan-dim: #0E3540;
+  --ro-warn: #FFC53D;
+  --ro-ok: #45E08A;
+  --ro-danger: #FF4D45;
+  --ro-info: #7FA9FF;
+
+  /* 派生:禁用层(表内无 --ro-text-3,由 text-2 降透构成,不引入新 hex) */
+  --ro-text-3: color-mix(in srgb, var(--ro-text-2) 52%, transparent);
+
+  /* 派生:青色窄辉光浓度档(§2.3 规则 4%–16%)与其他半透明 */
+  --ro-cyan-04: rgba(111, 227, 245, 0.04);
+  --ro-cyan-08: rgba(111, 227, 245, 0.08);
+  --ro-cyan-16: rgba(111, 227, 245, 0.16);
+  --ro-cyan-22: rgba(111, 227, 245, 0.22);
+  --ro-cyan-35: rgba(111, 227, 245, 0.35);
+  --ro-white-70: rgba(244, 250, 255, 0.70);
+  --ro-black-45: rgba(0, 0, 0, 0.45);
+  --ro-black-55: rgba(0, 0, 0, 0.55);
+  --ro-black-60: rgba(0, 0, 0, 0.60);
+  --ro-black-80: rgba(0, 0, 0, 0.80);
+  --ro-warn-08: rgba(255, 197, 61, 0.08);
+  --ro-ok-08: rgba(69, 224, 138, 0.08);
+  --ro-danger-08: rgba(255, 77, 69, 0.08);
+  --ro-info-08: rgba(127, 169, 255, 0.08);
+
+  /* 辉光/深度组合(§7C:rim 亮边 + 底部内嵌暗线 + 窄青辉光) */
+  --ro-glow-line: 0 0 12px var(--ro-cyan-16);
+  --ro-glow-soft: 0 0 10px var(--ro-cyan-08);
+  --ro-glow-text: 0 0 10px var(--ro-cyan-16);
+  --ro-rim: inset 0 1px 0 var(--ro-cyan-35);
+  --ro-sink: inset 0 -1px 0 var(--ro-black-60);
+  --ro-depth: var(--ro-rim), var(--ro-sink);
+  --ro-visor-inset: inset 0 0 120px var(--ro-black-80);
+
+  /* §4.1 共享刻度(base 8 / 微距 4) */
+  --sh-1: 4px; --sh-2: 8px; --sh-3: 12px; --sh-4: 16px; --sh-5: 24px;
+  --sh-6: 32px; --sh-7: 48px; --sh-8: 64px; --sh-9: 96px; --sh-10: 128px;
+
+  /* §3.3 字族与字级 */
+  --f-ui: "Chakra Petch", "Noto Sans SC", sans-serif;
+  --f-mono: "JetBrains Mono", "Noto Sans SC", monospace;
+  --fs-core: clamp(40px, 6vw, 72px);  /* core-readout /0.95 Mono 700 */
+  --fs-hud: 12px;                    /* hud-label §3.3:12px 大写仅限拉丁角标 */
+  --fs-hud-cjk: 14px;                /* 同位置中文标签走 14px 轨(§3 任何文字≥14px) */
+  --fs-body: 16px;
+  --fs-stat: 20px;
+
+  /* §6 动效时长 */
+  --t-micro: 120ms;
+  --t-standard: 240ms;
+  --t-emphasis: 480ms;
+  --ease-emph: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* 构件尺寸 */
+  --rail-w: clamp(236px, 17vw, 288px);
+  --bevel: 8px; /* 切角:右上/左下 8px(§5.1 ActionButton) */
+}
+
+/* --------------------------------------------------------------------------
+   2. Reset & base
+   -------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { color-scheme: dark; }
+
+body {
+  font-family: var(--f-ui);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--ro-text);
+  background: var(--ro-canvas);
+  overflow-x: clip; /* §4.1 根容器防横向溢出 */
+  min-height: 100dvh;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 座舱底光:径向渐亮向中心(§2.3 画布行) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: radial-gradient(120% 90% at 50% 42%, var(--ro-canvas-mid) 0%, var(--ro-canvas) 62%);
+}
+
+/* 全页暗角一层(§7C) */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  background: radial-gradient(130% 110% at 50% 46%, transparent 58%, var(--ro-black-45) 100%);
+}
+
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+a { color: inherit; }
+ul { list-style: none; }
+
+:focus-visible {
+  outline: 2px solid var(--ro-cyan);   /* §8:2px、offset 2px、≥3:1 */
+  outline-offset: 2px;
+}
+
+/* 切角构件被 clip-path 裁掉 outline,补形状贴合的辉光环 */
+.bevel:focus-visible {
+  outline: 2px solid var(--ro-cyan);
+  outline-offset: 2px;
+  filter: drop-shadow(0 0 1.5px var(--ro-cyan)) drop-shadow(0 0 1.5px var(--ro-cyan));
+}
+
+.skip {
+  position: fixed;
+  top: var(--sh-2);
+  left: var(--sh-2);
+  z-index: 99;
+  padding: var(--sh-2) var(--sh-4);
+  background: var(--ro-hull);
+  border: 1px solid var(--ro-cyan-dim);
+  transform: translateY(-200%);
+  transition: transform var(--t-micro) ease-out;
+}
+.skip:focus { transform: translateY(0); }
+
+/* 通用排印件。
+   .tick = §3.3 允许的 12px 大写拉丁,仅限 HUD 框角/刻度位。
+   .hud-label = 含中文的小标签:走 14px 轨(§3 任何文字 ≥ 14px)。 */
+.tick {
+  font-family: var(--f-ui);
+  font-size: var(--fs-hud);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ro-text-2);
+}
+.hud-label {
+  font-family: var(--f-ui);
+  font-size: var(--fs-hud-cjk);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  color: var(--ro-text-2);
+}
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------------------
+   3. Cockpit shell(§4.4:100dvh 固定框架,座舱视口优先)
+   -------------------------------------------------------------------------- */
+.cockpit {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--rail-w);
+  grid-template-rows: auto minmax(0, 1fr) minmax(230px, 25dvh);
+  grid-template-areas:
+    "top    top    top"
+    "left   center right"
+    "cluster cluster cluster";
+  min-height: 100dvh;
+  gap: var(--sh-4);
+  padding: var(--sh-4);
+  max-width: 1720px;
+  margin-inline: auto;
+}
+
+/* -- 顶部状态带 ---------------------------------------------------------- */
+.topbar {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  gap: var(--sh-4);
+  padding: var(--sh-2) var(--sh-4);
+  background: var(--ro-hull);
+  box-shadow: var(--ro-depth);
+  border: 1px solid var(--ro-cyan-08);
+}
+.topbar__brand {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sh-3);
+  white-space: nowrap;
+}
+.topbar__os {
+  font-weight: 700;
+  font-size: var(--fs-stat);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ro-cyan);
+  text-shadow: var(--ro-glow-text);
+}
+.topbar__ver { color: var(--ro-text-2); font-size: 14px; }
+.topbar__hook {
+  flex: 1;
+  text-align: center;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--ro-text);
+  letter-spacing: 0.02em;
+  min-width: 0;
+}
+.topbar__hook b { color: var(--ro-cyan); font-weight: 700; }
+.topbar__nav { display: flex; gap: var(--sh-2); white-space: nowrap; }
+.topbar__session { display: flex; align-items: center; gap: var(--sh-3); }
+.topbar__clock {
+  font-family: var(--f-mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  color: var(--ro-text-2);
+}
+
+/* -- 左右 HUD 边缘栏 ----------------------------------------------------- */
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sh-4);
+  min-height: 0;
+}
+.rail--left { grid-area: left; }
+.rail--right { grid-area: right; }
+
+.rail__panel {
+  position: relative;
+  background: var(--ro-hull);
+  box-shadow: var(--ro-depth);
+  border: 1px solid var(--ro-cyan-08);
+  padding: var(--sh-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sh-3);
+  min-height: 0;
+}
+.rail__panel--fill { flex: 1; }
+
+/* HUD 角括号(全页共用:四角短亮线) */
+.bracket { position: relative; }
+.bracket::before,
+.bracket::after {
+  content: "";
+  position: absolute;
+  width: var(--sh-5);
+  height: var(--sh-5);
+  border: 0 solid var(--ro-cyan);
+  pointer-events: none;
+}
+.bracket::before { top: -1px; left: -1px; border-top-width: 2px; border-left-width: 2px; }
+.bracket::after { bottom: -1px; right: -1px; border-bottom-width: 2px; border-right-width: 2px; }
+.bracket--soft::before, .bracket--soft::after { opacity: 0.5; }
+
+/* ParamReadout(BLK-2,§5.1:置于 HUD 左上角括号内,纯展示) */
+.param {
+  font-family: var(--f-mono);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ro-text);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sh-1) var(--sh-2);
+  line-height: 1.5;
+}
+.param dt {
+  font-family: var(--f-ui);
+  font-size: var(--fs-hud);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ro-text-2);
+}
+.param dd { color: var(--ro-cyan); text-shadow: var(--ro-glow-text); margin-inline-end: var(--sh-2); }
+.param dd::after { content: " ·"; color: var(--ro-text-2); }
+.param dd:last-of-type::after { content: ""; }
+
+/* TaskList(BLK-3,§5.1 C:边缘 HUD 竖列,切角标签堆叠,当前任务青色描边) */
+.tasklist { display: flex; flex-direction: column; gap: var(--sh-2); min-height: 0; }
+.task {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--sh-3);
+  min-height: 44px;                  /* §8 触控目标 */
+  padding: var(--sh-2) var(--sh-3);
+  background: var(--ro-hull-hi);
+  border: 1px solid var(--ro-cyan-08);
+  clip-path: polygon(0 0, calc(100% - var(--bevel)) 0, 100% var(--bevel), 100% 100%, var(--bevel) 100%, 0 calc(100% - var(--bevel)));
+  box-shadow: var(--ro-depth);
+  text-align: left;
+  transition: background-color var(--t-micro) ease-out,
+              border-color var(--t-micro) ease-out;
+}
+.task__name {
+  font-size: var(--fs-body);
+  font-weight: 600;
+  overflow-wrap: anywhere;           /* §8:超长中文标签不产生横向溢出 */
+}
+.task__no { font-family: var(--f-mono); font-size: 14px; color: var(--ro-text-2); }
+.task:hover, .task.is-hover { background: color-mix(in srgb, var(--ro-hull-hi) 82%, var(--ro-cyan)); border-color: var(--ro-cyan-22); }
+.task:active, .task.is-active { background: var(--ro-hull-hi); border-color: var(--ro-cyan-22); }
+.task--current,
+.task--current:hover,
+.task--current.is-hover {
+  background: var(--ro-hull-hi);
+  border-color: transparent;
+  box-shadow: 0 0 0 1px var(--ro-cyan), var(--ro-glow-soft), var(--ro-depth);
+}
+.task--current .task__name { color: var(--ro-cyan); }
+.task--locked, .task[disabled] {
+  color: var(--ro-text-3);
+  background: var(--ro-hull);
+  border-color: transparent;
+  box-shadow: var(--ro-sink);
+  cursor: not-allowed;
+}
+.task--locked .task__name, .task--locked .task__no { color: var(--ro-text-3); }
+.task--error,
+.task--error:hover,
+.task--error.is-hover {
+  background: var(--ro-danger-08);
+  border-color: transparent;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ro-danger) 60%, transparent), var(--ro-sink);
+}
+.task__empty {
+  padding: var(--sh-4);
+  border: 1px dashed var(--ro-cyan-22);
+  color: var(--ro-text-2);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* 右缘遥测 */
+.telemetry { display: flex; flex-direction: column; gap: var(--sh-3); }
+.telemetry__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sh-3);
+  padding-bottom: var(--sh-2);
+  border-bottom: 1px solid var(--ro-cyan-08);
+}
+.telemetry__row:last-child { border-bottom: 0; padding-bottom: 0; }
+.telemetry__v {
+  font-family: var(--f-mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-stat);
+  line-height: 1.2;
+  color: var(--ro-text);
+}
+.telemetry__v--live { color: var(--ro-cyan); text-shadow: var(--ro-glow-text); }
+
+/* --------------------------------------------------------------------------
+   4. 中央:遮光罩 + 透视靶道窗(签名构件,§4.4/§7C)
+   -------------------------------------------------------------------------- */
+.stage {
+  grid-area: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sh-3);
+  min-width: 0;
+  min-height: 0;
+}
+.stage__boot {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--sh-3);
+  flex-wrap: wrap;
+}
+.stage__title {
+  font-size: clamp(18px, 2vw, 24px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.visor-wrap {
+  position: relative;
+  flex: 1;
+  min-height: min(58dvh, 620px);
+}
+/* 青色描边层(1px,被裁形状) */
+.visor {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(var(--ro-cyan-22), var(--ro-cyan-08));
+  clip-path: polygon(0 0, 100% 0, 100% 80%, calc(100% - 9%) 100%, 9% 100%, 0 80%);
+}
+.visor__inner {
+  position: absolute;
+  inset: 1px;
+  background: var(--ro-canvas);
+  clip-path: polygon(0 0, 100% 0, 100% 80%, calc(100% - 9%) 100%, 9% 100%, 0 80%);
+}
+.tunnel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+/* 内阴影 + 径向底光(§7C) */
+.visor__inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(80% 55% at 50% 44%, var(--ro-cyan-04) 0%, transparent 60%);
+  box-shadow: var(--ro-visor-inset);
+}
+/* 遮光罩顶带 + 仰角刻度 */
+.visor__shade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(26px, 4.5%, 44px);
+  background:
+    repeating-linear-gradient(90deg,
+      var(--ro-cyan-22) 0 1px, transparent 1px calc(12.5% - 1px), transparent calc(12.5% - 1px), transparent 12.5%),
+    linear-gradient(var(--ro-hull), var(--ro-hull-hi));
+  border-bottom: 1px solid var(--ro-cyan-08);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+.visor__hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.visor__hud > .hud-label {
+  position: absolute;
+  color: var(--ro-cyan);
+  text-shadow: var(--ro-glow-text);
+}
+.visor__hud .hud-tl { top: calc(4.5% + 10px); left: 16px; }
+.visor__hud .hud-tr { top: calc(4.5% + 10px); right: 16px; color: var(--ro-warn); text-shadow: none; }
+.visor__hud .hud-bl { bottom: 10px; left: 20px; }
+.visor__hud .hud-br { bottom: 10px; right: 20px; }
+/* 视窗四角 bracket */
+.visor-wrap::before,
+.visor-wrap::after {
+  content: "";
+  position: absolute;
+  width: var(--sh-7);
+  height: var(--sh-7);
+  border: 0 solid var(--ro-cyan);
+  pointer-events: none;
+  z-index: 2;
+}
+.visor-wrap::before { top: calc(4.5% - 6px); left: -6px; border-top-width: 2px; border-left-width: 2px; }
+.visor-wrap::after { top: calc(4.5% - 6px); right: -6px; border-top-width: 2px; border-right-width: 2px; }
+.visor-corner-b { position: absolute; width: var(--sh-7); height: var(--sh-7); border: 0 solid var(--ro-cyan); pointer-events: none; z-index: 2; }
+.visor-corner-b--bl { bottom: -6px; left: -6px; border-bottom-width: 2px; border-left-width: 2px; }
+.visor-corner-b--br { bottom: -6px; right: -6px; border-bottom-width: 2px; border-right-width: 2px; }
+
+/* --------------------------------------------------------------------------
+   4b. 靶道窗 SVG 场景(灭点收缩:地平线光 / 隧道框 / 纵深靶标 / 准星 / 实测轨迹)
+   -------------------------------------------------------------------------- */
+.tn-deep { fill: url(#ro-deep); }
+.tn-frame { fill: none; stroke: var(--ro-cyan-dim); stroke-width: 1.5; }
+.tn-frame--near { stroke: var(--ro-cyan); stroke-width: 2; opacity: 0.6; }
+.tn-frame--mid { stroke: var(--ro-cyan); stroke-width: 1.5; opacity: 0.32; }
+.tn-frame--far { stroke: var(--ro-cyan); stroke-width: 1.25; opacity: 0.16; }
+.tn-vl { stroke: var(--ro-cyan-dim); stroke-width: 1; opacity: 0.85; }
+.tn-floor { stroke: var(--ro-cyan-dim); stroke-width: 1; opacity: 0.5; }
+.tn-horizon { stroke: var(--ro-cyan); stroke-width: 1; opacity: 0.5; }
+.tn-glow { fill: url(#ro-horizon-glow); }
+.tn-grid-h { stroke: var(--ro-cyan-dim); stroke-width: 1; }
+.tn-target-ring { fill: none; stroke: var(--ro-warn); stroke-width: 2; }
+.tn-target-core { fill: var(--ro-warn); }
+.tn-target--hit .tn-target-ring { stroke: var(--ro-ok); }
+.tn-target--hit .tn-target-core { fill: var(--ro-ok); }
+.tn-target-tick { stroke: var(--ro-text-2); stroke-width: 1; opacity: 0.7; }
+.tn-reticle { stroke: var(--ro-cyan); stroke-width: 1.5; }
+.tn-reticle-dot { fill: var(--ro-cyan); }
+.tn-trace {
+  fill: none;
+  stroke: var(--ro-cyan);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 3 5;
+  opacity: 0.9;
+}
+.tn-trace-overshoot { fill: var(--ro-danger); }
+.tn-trace-stop { fill: none; stroke: var(--ro-cyan); stroke-width: 1.5; }
+.tn-anno { font-family: var(--f-mono); font-size: 13px; fill: var(--ro-text-2); }
+.tn-anno--danger { fill: var(--ro-danger); }
+.tn-anno--cyan { fill: var(--ro-cyan); }
+.tn-dist { font-family: var(--f-mono); font-size: 12px; fill: var(--ro-text-2); }
+
+/* --------------------------------------------------------------------------
+   5. 原语:StatusChip / NumStat / ActionButton(§5.1 C 形态)
+   -------------------------------------------------------------------------- */
+/* StatusChip:HUD 标签形,切角 clip-path;文本+形状同色共存(§8) */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sh-2);
+  min-height: 24px;
+  padding: 2px var(--sh-2);
+  font-family: var(--f-ui);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  border: 1px solid currentColor;
+  clip-path: polygon(0 0, calc(100% - var(--sh-1)) 0, 100% var(--sh-1), 100% 100%, var(--sh-1) 100%, 0 calc(100% - var(--sh-1)));
+  color: var(--ro-text-2);
+}
+.chip__glyph { font-style: normal; font-size: 10px; line-height: 1; }
+.chip--ok { color: var(--ro-ok); background: var(--ro-ok-08); }
+.chip--warn { color: var(--ro-warn); background: var(--ro-warn-08); }
+.chip--danger { color: var(--ro-danger); background: var(--ro-danger-08); }
+.chip--info { color: var(--ro-info); background: var(--ro-info-08); }
+.chip--live { color: var(--ro-warn); background: var(--ro-warn-08); }
+.chip[disabled], .chip--disabled {
+  color: var(--ro-text-3);
+  background: none;
+  border-color: transparent;
+}
+
+/* ActionButton:切角 8px(右上/左下),青色描边发光(§5.1/§7C) */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sh-2);
+  min-height: 44px;
+  padding: 1px; /* 描边厚度,由外层底色露出 */
+  clip-path: polygon(0 0, calc(100% - var(--bevel)) 0, 100% var(--bevel), 100% 100%, var(--bevel) 100%, 0 calc(100% - var(--bevel)));
+  background: var(--ro-cyan-dim);
+  transition: background-color var(--t-micro) ease-out;
+}
+.btn__face {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sh-2);
+  width: 100%;
+  min-height: 42px;
+  padding: var(--sh-2) var(--sh-5);
+  clip-path: polygon(0 0, calc(100% - var(--bevel)) 0, 100% var(--bevel), 100% 100%, var(--bevel) 100%, 0 calc(100% - var(--bevel)));
+  background: var(--ro-hull-hi);
+  box-shadow: var(--ro-depth);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ro-cyan);
+  transition: background-color var(--t-micro) ease-out,
+              color var(--t-micro) ease-out,
+              box-shadow var(--t-micro) ease-out;
+}
+.btn:hover, .btn.is-hover { background: var(--ro-cyan); }
+.btn:hover .btn__face, .btn.is-hover .btn__face {
+  background: color-mix(in srgb, var(--ro-hull-hi) 86%, var(--ro-cyan));
+  box-shadow: var(--ro-depth), var(--ro-glow-line);
+}
+.btn:active, .btn.is-active { background: var(--ro-cyan-dim); }
+.btn:active .btn__face, .btn.is-active .btn__face {
+  background: var(--ro-hull);
+  box-shadow: var(--ro-sink);
+}
+.btn:disabled, .btn[aria-disabled="true"] { background: none; cursor: not-allowed; }
+.btn:disabled .btn__face, .btn[aria-disabled="true"] .btn__face {
+  background: var(--ro-hull);
+  color: var(--ro-text-3);
+  box-shadow: var(--ro-sink);
+}
+.btn--primary { background: var(--ro-cyan); }
+.btn--primary .btn__face {
+  background: var(--ro-cyan);
+  color: var(--ro-canvas);
+  font-weight: 700;
+  text-shadow: none;
+  box-shadow: var(--ro-rim), inset 0 -1px 0 var(--ro-cyan-35);
+}
+.btn--primary:hover, .btn--primary.is-hover { background: var(--ro-cyan); }
+.btn--primary:hover .btn__face, .btn--primary.is-hover .btn__face {
+  background: color-mix(in srgb, var(--ro-cyan) 86%, var(--ro-white-70));
+  box-shadow: var(--ro-rim), inset 0 -1px 0 var(--ro-cyan-35), var(--ro-glow-line);
+}
+.btn--primary:active .btn__face, .btn--primary.is-active .btn__face {
+  background: color-mix(in srgb, var(--ro-cyan) 82%, var(--ro-black-45));
+  box-shadow: var(--ro-sink);
+}
+.btn--primary:disabled .btn__face, .btn--primary[aria-disabled="true"] .btn__face {
+  background: var(--ro-hull);
+  color: var(--ro-text-3);
+  box-shadow: var(--ro-sink);
+}
+.btn--ghost .btn__face { background: var(--ro-hull); }
+
+/* NumStat:仪表版,40–72px 核心数值青色窄辉光;结构 figure>b+span+p */
+.stat { display: flex; flex-direction: column; gap: var(--sh-1); }
+.stat__value {
+  font-family: var(--f-mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-core);
+  line-height: 0.95;
+  color: var(--ro-cyan);
+  text-shadow: var(--ro-glow-text);
+  overflow-wrap: anywhere;
+}
+.stat__value--sm {
+  font-size: var(--fs-stat);
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--ro-text);
+  text-shadow: none;
+}
+.stat__unit {
+  font-family: var(--f-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ro-text-2);
+}
+/* 中文标签不低于 14px(§3);12px hud-label 仅承载大写拉丁 */
+.stat__label {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ro-text-2);
+}
+.stat__row { display: flex; align-items: baseline; gap: var(--sh-2); }
+/* hover 仅出现在可点进明细的实例(§5.1:下划线/亮度 +6%,禁位移) */
+.stat--link { cursor: pointer; }
+.stat--link:hover .stat__value, .stat--link.is-hover .stat__value {
+  filter: brightness(1.06);
+  text-decoration: underline;
+  text-underline-offset: var(--sh-2);
+}
+/* empty:"--" */
+.stat--empty .stat__value { color: var(--ro-text-2); text-shadow: none; }
+/* loading(静态):数字灰化 + live 记号 */
+.stat--loading .stat__value { color: var(--ro-text-3); text-shadow: none; }
+.stat--loading .stat__live {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--ro-warn);
+  border-top-color: transparent;
+  display: inline-block;
+}
+/* error:danger + 下一步提示 */
+.stat--error .stat__value { color: var(--ro-danger); text-shadow: none; }
+.stat__note { font-size: 14px; color: var(--ro-text-2); line-height: 1.4; }
+.stat__note--danger { color: var(--ro-danger); }
+
+/* --------------------------------------------------------------------------
+   6. 仪表簇(§4.4:下缘 25vh 扇形簇,3–5 弧/环仪表 + 主裁决仪表)
+   -------------------------------------------------------------------------- */
+.cluster {
+  grid-area: cluster;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sh-3);
+  min-width: 0;
+}
+.cluster__row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(var(--sh-4), 4vw, var(--sh-8));
+  padding: var(--sh-4) var(--sh-5) var(--sh-3);
+  background: var(--ro-hull);
+  border: 1px solid var(--ro-cyan-08);
+  box-shadow: var(--ro-depth);
+  flex-wrap: wrap;
+}
+
+.gauge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sh-2);
+  width: clamp(104px, 11vw, 136px);
+}
+/* 扇形排布:两侧下沉(静态,不做 transform 动画) */
+@media (min-width: 1280px) {
+  .cluster__row > .gauge:nth-child(1) { transform: translateY(14px); }
+  .cluster__row > .gauge:nth-child(2) { transform: translateY(5px); }
+  .cluster__row > .gauge:nth-child(4) { transform: translateY(5px); }
+  .cluster__row > .gauge:nth-child(5) { transform: translateY(14px); }
+}
+.gauge__dial { position: relative; width: 96px; height: 96px; }
+.gauge__dial svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.gauge__arc-track { fill: none; stroke: var(--ro-cyan-dim); stroke-width: 5; }
+.gauge__arc-val { fill: none; stroke-width: 5; stroke-linecap: butt; }
+.gauge__val--warn { stroke: var(--ro-warn); }
+.gauge__val--ok { stroke: var(--ro-ok); }
+.gauge__val--info { stroke: var(--ro-info); }
+.gauge__val--danger { stroke: var(--ro-danger); }
+.gauge__val--cyan { stroke: var(--ro-cyan); }
+.gauge__read {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+}
+.gauge__num { font-size: var(--fs-stat); font-weight: 600; line-height: 1.2; }
+.gauge__num--warn { color: var(--ro-warn); }
+.gauge__num--ok { color: var(--ro-ok); }
+.gauge__num--info { color: var(--ro-info); }
+.gauge__num--danger { color: var(--ro-danger); }
+.gauge__num--cyan { color: var(--ro-cyan); text-shadow: var(--ro-glow-text); }
+.gauge__unit { font-size: var(--fs-hud); color: var(--ro-text-2); letter-spacing: 0.08em; }
+.gauge__cap {
+  font-size: var(--fs-hud);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ro-text-2);
+}
+
+/* VerdictBand(BLK-5 主仪表,靶道窗正下方;结论一句话 + 数字 + 对比,不可拆分) */
+.verdict {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: var(--sh-4) var(--sh-5);
+  max-width: 780px;
+  min-width: min(430px, 100%);
+  padding: var(--sh-4) var(--sh-5);
+  background: var(--ro-hull-hi);
+  border: 1px solid var(--ro-cyan-22);
+  box-shadow: var(--ro-depth), var(--ro-glow-soft);
+  position: relative;
+}
+.verdict__ring { position: relative; width: 118px; height: 118px; }
+.verdict__ring svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.verdict__ring-core {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.verdict__k { font-size: var(--fs-hud); font-weight: 600; letter-spacing: 0.14em; color: var(--ro-text-2); }
+.verdict__main { grid-area: 1 / 2; }
+.verdict__verdict {
+  font-family: var(--f-mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-core);
+  line-height: 0.95;
+  color: var(--ro-warn);
+}
+.verdict__word { font-family: var(--f-ui); font-size: 0.62em; font-weight: 700; margin-left: var(--sh-2); }
+.verdict__conf {
+  display: block;
+  font-family: var(--f-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ro-text-2);
+  margin-top: var(--sh-2);
+}
+.verdict__detail {
+  grid-area: 1 / 3;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sh-2);
+  min-width: 0;
+}
+.verdict__line { font-size: var(--fs-body); color: var(--ro-text); line-height: 1.5; overflow-wrap: anywhere; }
+.verdict__rec { color: var(--ro-cyan); font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-shadow: var(--ro-glow-text); }
+.verdict__delta { font-size: 14px; color: var(--ro-text-2); }
+.verdict__up { color: var(--ro-ok); font-weight: 700; }
+.verdict__actions { grid-area: 2 / 1 / 3 / 4; display: flex; gap: var(--sh-3); flex-wrap: wrap; align-items: center; }
+.verdict__hint { font-size: 14px; color: var(--ro-text-2); }
+
+/* HistoryRail(BLK-6:仪表簇旁水平航迹线,节点为各轮) */
+.rail-hist {
+  display: flex;
+  align-items: center;
+  gap: var(--sh-4);
+  padding: var(--sh-2) var(--sh-5);
+  background: var(--ro-hull);
+  border: 1px solid var(--ro-cyan-08);
+  box-shadow: var(--ro-sink);
+}
+.rail-hist__cap { flex-shrink: 0; }
+.rail-hist__track { position: relative; flex: 1; min-width: 0; height: 44px; }
+.rail-hist__line {
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  height: 1px;
+  background: var(--ro-cyan-dim);
+}
+.rail-hist__node {
+  position: absolute;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  border: 1px solid var(--ro-cyan);
+  background: var(--ro-canvas);
+  transform: rotate(45deg);
+}
+.rail-hist__node--past { border-color: var(--ro-cyan-dim); }
+.rail-hist__node--now {
+  width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px;
+  border-color: var(--ro-warn);
+  background: var(--ro-warn-08);
+  box-shadow: var(--ro-glow-soft);
+}
+.rail-hist__tag {
+  position: absolute;
+  top: calc(50% + 12px);
+  margin-left: -18px;
+  font-family: var(--f-mono);
+  font-size: var(--fs-hud);
+  color: var(--ro-text-2);
+}
+.rail-hist__delta { font-size: 14px; color: var(--ro-text-2); white-space: nowrap; }
+.rail-hist__delta b { color: var(--ro-ok); }
+
+/* --------------------------------------------------------------------------
+   7. Showcase 辅助(concepts/range-os/showcase.html 专用)
+   -------------------------------------------------------------------------- */
+.show {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: var(--sh-5) var(--sh-4) var(--sh-9);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sh-6);
+}
+.show__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sh-3) var(--sh-5); }
+.show__title {
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ro-cyan);
+  text-shadow: var(--ro-glow-text);
+}
+.show__sub { font-size: 14px; color: var(--ro-text-2); max-width: 60ch; }
+.show__topnav { margin-left: auto; display: flex; gap: var(--sh-2); }
+.show-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: var(--sh-5); }
+.panel {
+  background: var(--ro-hull);
+  border: 1px solid var(--ro-cyan-08);
+  box-shadow: var(--ro-depth);
+  padding: var(--sh-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sh-4);
+}
+.panel > h2 {
+  font-size: var(--fs-stat);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ro-text);
+  padding-bottom: var(--sh-3);
+  border-bottom: 1px solid var(--ro-cyan-08);
+}
+.panel h3 { font-size: 14px; font-weight: 600; color: var(--ro-text-2); letter-spacing: 0.08em; text-transform: uppercase; }
+.panel__note { font-size: 14px; color: var(--ro-text-2); line-height: 1.5; }
+.state { display: flex; flex-direction: column; gap: var(--sh-2); }
+.state__tag { font-family: var(--f-mono); font-size: 14px; color: var(--ro-text-2); letter-spacing: 0.06em; }
+.state__body { display: flex; flex-wrap: wrap; gap: var(--sh-3); align-items: center; }
+.state__body--col { flex-direction: column; align-items: stretch; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: var(--sh-2); }
+.swatch {
+  border: 1px solid var(--ro-cyan-08);
+  box-shadow: var(--ro-sink);
+  padding: var(--sh-2) var(--sh-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sh-1);
+  min-height: 64px;
+  justify-content: flex-end;
+}
+.swatch__name { font-size: 14px; font-weight: 600; }
+.swatch__tok { font-family: var(--f-mono); font-size: var(--fs-hud); color: var(--ro-text-2); }
+.swatch__on { color: var(--ro-canvas); font-weight: 700; }
+.swatch--canvas { background: var(--ro-canvas); }
+.swatch--hull { background: var(--ro-hull); }
+.swatch--hullhi { background: var(--ro-hull-hi); }
+.swatch--text { background: var(--ro-text); }
+.swatch--text2 { background: var(--ro-text-2); }
+.swatch--cyan { background: var(--ro-cyan); }
+.swatch--cyandim { background: var(--ro-cyan-dim); }
+.swatch--warn { background: var(--ro-warn); }
+.swatch--ok { background: var(--ro-ok); }
+.swatch--danger { background: var(--ro-danger); }
+.swatch--info { background: var(--ro-info); }
+.type-scale { display: flex; flex-direction: column; gap: var(--sh-4); }
+.type-scale__core {
+  font-family: var(--f-mono);
+  font-weight: 700;
+  font-size: var(--fs-core);
+  line-height: 0.95;
+  color: var(--ro-cyan);
+  text-shadow: var(--ro-glow-text);
+}
+.visor-mini {
+  position: relative;
+  border: 1px solid var(--ro-cyan-22);
+  background: var(--ro-canvas);
+  box-shadow: var(--ro-visor-inset);
+  overflow: hidden;
+  aspect-ratio: 1000 / 560;
+}
+.visor-mini svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* --------------------------------------------------------------------------
+   8. Responsive(断点 §4.1/§4.4:960 以下收单列,960 以下仪表簇两层、视窗 40vh)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1023px) {
+  .cockpit {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(40dvh, auto) auto auto auto;
+    grid-template-areas:
+      "top"
+      "center"
+      "left"
+      "right"
+      "cluster";
+    min-height: auto;
+  }
+  .stage { min-height: 40dvh; }
+  .visor-wrap { min-height: 340px; }
+  .rail--right { order: 0; }
+  .cluster__row { align-items: stretch; }
+}
+
+@media (max-width: 767px) {
+  .cockpit { gap: var(--sh-3); padding: var(--sh-3); }
+  .topbar { flex-wrap: wrap; row-gap: var(--sh-2); }
+  .topbar__hook { order: 3; flex-basis: 100%; text-align: left; }
+  .rail { flex-direction: column; }
+  .cluster__row { padding: var(--sh-4); gap: var(--sh-4); }
+  .verdict {
+    grid-template-columns: auto 1fr;
+    min-width: 0;
+  }
+  .verdict__main { grid-area: 1 / 2; }
+  .verdict__detail { grid-area: 2 / 1 / 3 / 3; }
+  .verdict__actions { grid-area: 3 / 1 / 4 / 3; }
+  .rail-hist { flex-wrap: wrap; }
+}
+
+@media (max-width: 639px) {
+  :root { --fs-core: clamp(40px, 12vw, 56px); }
+  .stage__boot { justify-content: flex-start; }
+  .gauge { width: calc(50% - var(--sh-4)); }
+  .gauge__dial { width: 84px; height: 84px; }
+}
+
+/* --------------------------------------------------------------------------
+   9. Reduced motion(§6/§8:动效降为直接换态,静态氛围保留)
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

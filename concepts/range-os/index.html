@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Range OS · CS2 灵敏度靶场座舱概念:全屏座舱,透视靶道窗,HUD 边缘控件,底部仪表簇与主裁决仪表。3 分钟测出最稳灵敏度。">
+<title>靶场座舱 · CS2 灵敏度操作系统 — Range OS 概念</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a href="#cockpit" class="skip">跳至座舱主区</a>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     座舱壳(§4.4:100dvh 固定框架 · 座舱视口优先)
+════════════════════════════════════════════════════════════════════ -->
+<div class="cockpit" id="cockpit">
+
+  <!-- ── 顶部状态带(BLK-1 钩子 + BLK-2 参数碎片) ── -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="topbar__os">RANGE&nbsp;OS</span>
+      <span class="topbar__ver">v0.2.1 · 概念</span>
+    </div>
+    <p class="topbar__hook">3 分钟,测出你<b>最稳</b>的 CS2 灵敏度</p>
+    <div class="topbar__nav">
+      <span class="chip chip--live"><i class="chip__glyph" aria-hidden="true">●</i>会话进行中</span>
+      <span class="topbar__session">
+        <span class="topbar__clock mono">12:47</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- ── 左缘 HUD:参数( BLK-2) + 任务队列(BLK-3) ── -->
+  <aside class="rail rail--left" aria-label="左缘控制">
+    <div class="rail__panel bracket">
+      <span class="hud-label">当前参数</span>
+      <dl class="param">
+        <dt>SENS</dt><dd>1.02</dd>
+        <dt>DPI</dt><dd>800</dd>
+        <dt>eDPI</dt><dd>816</dd>
+      </dl>
+    </div>
+
+    <div class="rail__panel rail__panel--fill bracket">
+      <div class="bracket__head" style="display:flex;justify-content:space-between;align-items:baseline">
+        <span class="hud-label">任务队列</span>
+        <span class="tick">3/4 · 初测</span>
+      </div>
+      <nav class="tasklist" aria-label="测试项目">
+        <button type="button" class="task">
+          <span class="task__no">01</span>
+          <span class="task__name">甩枪定位</span>
+          <span class="chip chip--ok" style="min-height:20px;padding:1px 6px"><i class="chip__glyph" aria-hidden="true">▲</i>完成</span>
+        </button>
+        <button type="button" class="task task--current" aria-pressed="true">
+          <span class="task__no">02</span>
+          <span class="task__name">平滑追踪</span>
+          <span class="chip chip--live" style="min-height:20px;padding:1px 6px"><i class="chip__glyph" aria-hidden="true">●</i>进行中</span>
+        </button>
+        <button type="button" class="task">
+          <span class="task__no">03</span>
+          <span class="task__name">六目标铺面</span>
+          <span class="chip chip--info" style="min-height:20px;padding:1px 6px"><i class="chip__glyph" aria-hidden="true">●</i>排队</span>
+        </button>
+        <button type="button" class="task">
+          <span class="task__no">04</span>
+          <span class="task__name">极限甩距反弹复合校验</span>
+          <span class="chip chip--warn" style="min-height:20px;padding:1px 6px"><i class="chip__glyph" aria-hidden="true">◆</i>补测</span>
+        </button>
+        <button type="button" class="task task--locked" disabled>
+          <span class="task__no">05</span>
+          <span class="task__name">复测确认</span>
+          <span class="chip chip--disabled" style="min-height:20px;padding:1px 6px"><i class="chip__glyph" aria-hidden="true">✕</i>锁定</span>
+        </button>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ── 中央:开机标题 + 遮光罩 + 透视靶道窗(签名构件) ── -->
+  <section class="stage" aria-label="靶道视场">
+    <div class="stage__boot">
+      <h1 class="stage__title">透视靶道 · 甩枪分布</h1>
+      <span class="tick">推荐档 1.02 · 20 样本</span>
+    </div>
+
+    <div class="visor-wrap">
+      <!-- 青色描边层(clip-path 梯形) -->
+      <div class="visor" aria-hidden="true"></div>
+      <div class="visor__inner" aria-hidden="true"></div>
+
+      <!-- 遮光罩顶带(仰角刻度) -->
+      <div class="visor__shade" aria-hidden="true"></div>
+
+      <!-- HUD 框角标注 -->
+      <div class="visor__hud" aria-hidden="true">
+        <span class="hud-label hud-tl">TUNNEL · 04 TARGETS</span>
+        <span class="hud-label hud-tr">LIVE ●</span>
+        <span class="hud-label hud-bl">TRACE 20/20</span>
+        <span class="hud-label hud-br">OVERSHOOT +4.2%</span>
+      </div>
+
+      <!-- 底部框角 bracket -->
+      <div class="visor-corner-b visor-corner-b--bl" aria-hidden="true"></div>
+      <div class="visor-corner-b visor-corner-b--br" aria-hidden="true"></div>
+
+      <!-- 靶道窗 SVG 场景 -->
+      <svg class="tunnel" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid slice" role="img"
+           aria-label="透视靶道场景:灭点位于画面上方中央,地平线光从深处透出,隧道框三层收缩,纵深四颗靶标沿灭点排列,其中近处一颗已命中(绿色),其余为黄色待射。准星固定居中,青色虚线为甩枪实测轨迹,从左下角起射、越过靶心后回拉,红色圆点标记过冲停点。">
+
+        <defs>
+          <!-- 深空径向渐变(从灭点向外暗下去) -->
+          <radialGradient id="ro-deep" cx="50%" cy="38%" r="55%">
+            <stop offset="0%" stop-color="#0E1A26"/>
+            <stop offset="30%" stop-color="#080F16"/>
+            <stop offset="100%" stop-color="#04070B"/>
+          </radialGradient>
+          <!-- 地平线辉光 -->
+          <radialGradient id="ro-horizon-glow" cx="50%" cy="38%" r="22%">
+            <stop offset="0%" stop-color="#6FE3F5" stop-opacity="0.22"/>
+            <stop offset="50%" stop-color="#0E3540" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#05080C" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- 底色 -->
+        <rect width="1000" height="560" class="tn-deep"/>
+
+        <!-- 地平线辉光(灭点处) -->
+        <rect width="1000" height="560" class="tn-glow"/>
+
+        <!-- 隧道框:三层收缩(近/中/远) -->
+        <rect x="60" y="80" width="880" height="360" rx="2" class="tn-frame tn-frame--near"/>
+        <rect x="180" y="130" width="640" height="280" rx="2" class="tn-frame tn-frame--mid"/>
+        <rect x="320" y="180" width="360" height="200" rx="2" class="tn-frame tn-frame--far"/>
+
+        <!-- 灭点透视线(从四角向灭点收敛) -->
+        <g class="tn-vl">
+          <line x1="60" y1="80" x2="500" y2="250"/>
+          <line x1="940" y1="80" x2="500" y2="250"/>
+          <line x1="60" y1="440" x2="500" y2="250"/>
+          <line x1="940" y1="440" x2="500" y2="250"/>
+          <line x1="180" y1="130" x2="500" y2="250"/>
+          <line x1="820" y1="130" x2="500" y2="250"/>
+          <line x1="180" y1="410" x2="500" y2="250"/>
+          <line x1="820" y1="410" x2="500" y2="250"/>
+        </g>
+
+        <!-- 地平线 -->
+        <line x1="0" y1="250" x2="1000" y2="250" class="tn-horizon"/>
+
+        <!-- 地板网格(透视收缩) -->
+        <g class="tn-floor">
+          <line x1="60" y1="440" x2="940" y2="440"/>
+          <line x1="140" y1="410" x2="860" y2="410"/>
+          <line x1="240" y1="370" x2="760" y2="370"/>
+          <line x1="340" y1="320" x2="660" y2="320"/>
+          <!-- 透视纵线 -->
+          <line x1="60" y1="440" x2="500" y2="250"/>
+          <line x1="940" y1="440" x2="500" y2="250"/>
+          <line x1="180" y1="440" x2="500" y2="250"/>
+          <line x1="820" y1="440" x2="500" y2="250"/>
+          <line x1="340" y1="440" x2="500" y2="250"/>
+          <line x1="660" y1="440" x2="500" y2="250"/>
+        </g>
+
+        <!-- 纵深靶标(由远到近) -->
+        <!-- 最远(小) -->
+        <g transform="translate(470,238)">
+          <circle r="6" class="tn-target-ring"/>
+          <circle r="2.5" class="tn-target-core"/>
+          <line x1="-10" y1="0" x2="10" y2="0" class="tn-target-tick"/>
+          <line x1="0" y1="-10" x2="0" y2="10" class="tn-target-tick"/>
+        </g>
+        <!-- 中远 -->
+        <g transform="translate(360,300)">
+          <circle r="9" class="tn-target-ring"/>
+          <circle r="3.5" class="tn-target-core"/>
+          <line x1="-14" y1="0" x2="14" y2="0" class="tn-target-tick"/>
+          <line x1="0" y1="-14" x2="0" y2="14" class="tn-target-tick"/>
+        </g>
+        <!-- 中近(命中=绿) -->
+        <g transform="translate(620,290)" class="tn-target--hit">
+          <circle r="9" class="tn-target-ring"/>
+          <circle r="3.5" class="tn-target-core"/>
+          <line x1="-14" y1="0" x2="14" y2="0" class="tn-target-tick"/>
+          <line x1="0" y1="-14" x2="0" y2="14" class="tn-target-tick"/>
+        </g>
+        <!-- 最近(大) -->
+        <g transform="translate(750,360)">
+          <circle r="14" class="tn-target-ring"/>
+          <circle r="5" class="tn-target-core"/>
+          <line x1="-22" y1="0" x2="22" y2="0" class="tn-target-tick"/>
+          <line x1="0" y1="-22" x2="0" y2="22" class="tn-target-tick"/>
+        </g>
+
+        <!-- 准星(固定居中) -->
+        <g transform="translate(500,250)">
+          <line x1="-14" y1="0" x2="-4" y2="0" class="tn-reticle"/>
+          <line x1="14" y1="0" x2="4" y2="0" class="tn-reticle"/>
+          <line x1="0" y1="-14" x2="0" y2="-4" class="tn-reticle"/>
+          <line x1="0" y1="14" x2="0" y2="4" class="tn-reticle"/>
+          <circle r="1.5" class="tn-reticle-dot"/>
+        </g>
+
+        <!-- 实测轨迹(青色虚线:从左下起射 → 越过靶心 → 回拉) -->
+        <path d="M 120 470 Q 320 360 500 250 L 540 232 L 520 244" class="tn-trace"/>
+
+        <!-- 过冲停点(红色) -->
+        <circle cx="540" cy="232" r="4" class="tn-trace-overshoot"/>
+        <circle cx="540" cy="232" r="8" fill="none" class="tn-trace-stop" style="stroke:var(--ro-danger)"/>
+
+        <!-- 起射点 -->
+        <circle cx="120" cy="470" r="3" class="tn-trace-stop"/>
+
+        <!-- 标注 -->
+        <text x="100" y="495" class="tn-dist">起射 · 18M</text>
+        <text x="548" y="218" class="tn-anno tn-anno--danger">过冲 +4.2%</text>
+        <text x="640" y="278" class="tn-anno tn-anno--cyan">命中 · 0.95°</text>
+        <text x="770" y="392" class="tn-dist">14M</text>
+        <text x="478" y="222" class="tn-dist">灭点</text>
+        <text x="50" y="60" class="tn-anno">弹道角散布 ±2.4°</text>
+        <text x="820" y="60" class="tn-anno tn-anno--cyan">均值偏移 右上 +0.7°</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ── 右缘 HUD:实时遥测(BLK-4) ── -->
+  <aside class="rail rail--right" aria-label="右缘遥测">
+    <div class="rail__panel rail__panel--fill bracket">
+      <span class="hud-label">实时遥测</span>
+      <div class="telemetry">
+        <div class="telemetry__row">
+          <span class="hud-label">过冲率 ◆</span>
+          <span class="telemetry__v mono" style="color:var(--ro-warn)">+4.2%</span>
+        </div>
+        <div class="telemetry__row">
+          <span class="hud-label">下冲率</span>
+          <span class="telemetry__v mono">-1.8%</span>
+        </div>
+        <div class="telemetry__row">
+          <span class="hud-label">命中率 ▲</span>
+          <span class="telemetry__v mono">63%</span>
+        </div>
+        <div class="telemetry__row">
+          <span class="hud-label">平均反应</span>
+          <span class="telemetry__v mono">312ms</span>
+        </div>
+        <div class="telemetry__row">
+          <span class="hud-label">路径效率</span>
+          <span class="telemetry__v mono">78%</span>
+        </div>
+        <div class="telemetry__row">
+          <span class="hud-label">帧率</span>
+          <span class="telemetry__v mono telemetry__v--live">142 FPS</span>
+        </div>
+        <div class="telemetry__row">
+          <span class="hud-label">1% LOW</span>
+          <span class="telemetry__v mono">38</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── 底部仪表簇(BLK-4 仪表 + BLK-5 裁决 + BLK-6 航迹) ── -->
+  <section class="cluster" aria-label="仪表簇与裁决">
+
+    <!-- 仪表簇(5 个弧形仪表) -->
+    <div class="cluster__row">
+      <!-- 仪表 1:过冲 -->
+      <div class="gauge">
+        <div class="gauge__dial">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M 15 85 A 42 42 0 0 1 85 85" class="gauge__arc-track"/>
+            <path d="M 15 85 A 42 42 0 0 1 68 28" class="gauge__arc-val gauge__val--warn" style="stroke-dasharray:88;stroke-dashoffset:38"/>
+          </svg>
+          <div class="gauge__read">
+            <span class="gauge__num gauge__num--warn mono">+4.2%</span>
+            <span class="gauge__unit">OVERSHOOT</span>
+          </div>
+        </div>
+        <span class="gauge__cap">过冲率 ◆</span>
+      </div>
+      <!-- 仪表 2:下冲 -->
+      <div class="gauge">
+        <div class="gauge__dial">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M 15 85 A 42 42 0 0 1 85 85" class="gauge__arc-track"/>
+            <path d="M 15 85 A 42 42 0 0 1 36 72" class="gauge__arc-val gauge__val--info" style="stroke-dasharray:88;stroke-dashoffset:70"/>
+          </svg>
+          <div class="gauge__read">
+            <span class="gauge__num gauge__num--info mono">-1.8%</span>
+            <span class="gauge__unit">UNDERSHOOT</span>
+          </div>
+        </div>
+        <span class="gauge__cap">下冲率</span>
+      </div>
+      <!-- 仪表 3:命中率 -->
+      <div class="gauge">
+        <div class="gauge__dial">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M 15 85 A 42 42 0 0 1 85 85" class="gauge__arc-track"/>
+            <path d="M 15 85 A 42 42 0 0 1 62 32" class="gauge__arc-val gauge__val--cyan" style="stroke-dasharray:88;stroke-dashoffset:32"/>
+          </svg>
+          <div class="gauge__read">
+            <span class="gauge__num gauge__num--cyan mono">63%</span>
+            <span class="gauge__unit">ACCURACY</span>
+          </div>
+        </div>
+        <span class="gauge__cap">命中率 ▲</span>
+      </div>
+      <!-- 仪表 4:反应 -->
+      <div class="gauge">
+        <div class="gauge__dial">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M 15 85 A 42 42 0 0 1 85 85" class="gauge__arc-track"/>
+            <path d="M 15 85 A 42 42 0 0 1 50 43" class="gauge__arc-val gauge__val--ok" style="stroke-dasharray:88;stroke-dashoffset:48"/>
+          </svg>
+          <div class="gauge__read">
+            <span class="gauge__num gauge__num--ok mono">312</span>
+            <span class="gauge__unit">MS</span>
+          </div>
+        </div>
+        <span class="gauge__cap">平均反应</span>
+      </div>
+      <!-- 仪表 5:路径效率 -->
+      <div class="gauge">
+        <div class="gauge__dial">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M 15 85 A 42 42 0 0 1 85 85" class="gauge__arc-track"/>
+            <path d="M 15 85 A 42 42 0 0 1 58 35" class="gauge__arc-val gauge__val--cyan" style="stroke-dasharray:88;stroke-dashoffset:40"/>
+          </svg>
+          <div class="gauge__read">
+            <span class="gauge__num gauge__num--cyan mono">78%</span>
+            <span class="gauge__unit">PATH EFF</span>
+          </div>
+        </div>
+        <span class="gauge__cap">路径效率</span>
+      </div>
+    </div>
+
+    <!-- 主裁决仪表(BLK-5) -->
+    <div class="verdict" role="group" aria-label="裁决结果">
+      <!-- 判定环 -->
+      <div class="verdict__ring">
+        <svg viewBox="0 0 118 118" aria-hidden="true">
+          <circle cx="59" cy="59" r="50" fill="none" stroke="var(--ro-cyan-dim)" stroke-width="4"/>
+          <!-- 黄色 live 环(收拢为绿色 ok 的终态) -->
+          <circle cx="59" cy="59" r="50" fill="none" stroke="var(--ro-warn)" stroke-width="4"
+                  stroke-dasharray="314" stroke-dashoffset="41" stroke-linecap="butt"
+                  transform="rotate(-90 59 59)" opacity="0.85"/>
+        </svg>
+        <div class="verdict__ring-core">
+          <span class="verdict__k">置信度</span>
+          <span class="mono" style="font-size:var(--fs-stat);font-weight:700;color:var(--ro-warn)">87%</span>
+        </div>
+      </div>
+
+      <!-- 判定主文 -->
+      <div class="verdict__main">
+        <span class="verdict__verdict">偏快<span class="verdict__word">✕</span></span>
+        <span class="verdict__conf">收敛至 eDPI 760–800 后复测确认</span>
+      </div>
+
+      <!-- 推荐与对比 -->
+      <div class="verdict__detail">
+        <p class="verdict__line">推荐区间 <span class="verdict__rec">0.95 – 1.00</span></p>
+        <p class="verdict__delta">对比上一轮:过冲率 <span class="verdict__up">+4.2% ↑1.1</span> · 置信度 <span class="verdict__up">87% ↑5</span></p>
+        <p class="verdict__hint">本页为纯视觉概念,不执行测试。</p>
+      </div>
+
+      <!-- 操作 -->
+      <div class="verdict__actions">
+        <button type="button" class="btn btn--primary bevel">
+          <span class="btn__face">进入测试</span>
+        </button>
+        <button type="button" class="btn bevel">
+          <span class="btn__face">查看历史轮次</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 历史航迹(BLK-6) -->
+    <div class="rail-hist" role="group" aria-label="历史航迹">
+      <span class="rail-hist__cap hud-label">轮次航迹</span>
+      <div class="rail-hist__track">
+        <div class="rail-hist__line" aria-hidden="true"></div>
+        <span class="rail-hist__node rail-hist__node--past" style="left:8%" aria-hidden="true"></span>
+        <span class="rail-hist__tag mono" style="left:8%;top:calc(50% + 12px);margin-left:-14px">R10</span>
+        <span class="rail-hist__node rail-hist__node--past" style="left:28%" aria-hidden="true"></span>
+        <span class="rail-hist__tag mono" style="left:28%;top:calc(50% + 12px);margin-left:-14px">R11</span>
+        <span class="rail-hist__node rail-hist__node--now" style="left:52%" aria-hidden="true"></span>
+        <span class="rail-hist__tag mono" style="left:52%;top:calc(50% + 12px);margin-left:-14px">R12</span>
+        <span class="rail-hist__node rail-hist__node--past" style="left:76%;opacity:0.3" aria-hidden="true"></span>
+      </div>
+      <span class="rail-hist__delta">置信度 <b>87% ↑5</b></span>
+    </div>
+
+  </section>
+
+</div><!-- /cockpit -->
+
+</body>
+</html>

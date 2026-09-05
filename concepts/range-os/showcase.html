@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Range OS 原语展示:按钮状态、HUD 状态签、大数字读数(空/载入/误差)、任务队列状态、弧形仪表与裁决仪表。">
+<title>靶场座舱 · 原语展示 — Range OS Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="show">
+  <div class="show__head">
+    <h1 class="show__title">原语展示</h1>
+    <p class="show__sub">逐一展示 Range OS 全部原语的 default / hover / active / focus / disabled / loading / empty / error 状态。视觉验收通过后才允许组合产品屏。</p>
+    <nav class="show__topnav">
+      <a href="index.html" class="btn btn--ghost bevel"><span class="btn__face">← 产品页</span></a>
+      <a href="../index.html" class="btn btn--ghost bevel"><span class="btn__face">← 概念总览</span></a>
+    </nav>
+  </div>
+
+  <!-- 1. 按钮状态 -->
+  <section class="panel">
+    <h2>切角按钮</h2>
+    <div class="show-grid">
+      <div class="state">
+        <span class="state__tag mono">主按钮(青色实心)</span>
+        <div class="state__body">
+          <button type="button" class="btn btn--primary bevel"><span class="btn__face">默认</span></button>
+          <button type="button" class="btn btn--primary bevel is-hover"><span class="btn__face">悬停</span></button>
+          <button type="button" class="btn btn--primary bevel is-active"><span class="btn__face">按下</span></button>
+          <button type="button" class="btn btn--primary bevel" disabled><span class="btn__face">禁用</span></button>
+        </div>
+        <p class="panel__note">hover 青色辉光 / active 降一档 / disabled 灰化下沉</p>
+      </div>
+      <div class="state">
+        <span class="state__tag mono">次按钮(青色描边)</span>
+        <div class="state__body">
+          <button type="button" class="btn bevel"><span class="btn__face">默认</span></button>
+          <button type="button" class="btn bevel is-hover"><span class="btn__face">悬停</span></button>
+          <button type="button" class="btn bevel is-active"><span class="btn__face">按下</span></button>
+          <button type="button" class="btn bevel" disabled><span class="btn__face">禁用</span></button>
+        </div>
+        <p class="panel__note">hover 描边变亮 / active 舱面下沉</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 状态签 -->
+  <section class="panel">
+    <h2>HUD 状态签</h2>
+    <div class="show-grid">
+      <div class="state">
+        <span class="state__tag mono">五语义</span>
+        <div class="state__body">
+          <span class="chip chip--ok"><i class="chip__glyph" aria-hidden="true">▲</i>达标</span>
+          <span class="chip chip--warn"><i class="chip__glyph" aria-hidden="true">◆</i>注意</span>
+          <span class="chip chip--danger"><i class="chip__glyph" aria-hidden="true">✕</i>不达标</span>
+          <span class="chip chip--info"><i class="chip__glyph" aria-hidden="true">●</i>提示</span>
+          <span class="chip chip--live"><i class="chip__glyph" aria-hidden="true">●</i>进行中</span>
+        </div>
+        <p class="panel__note">切角 clip-path · 颜色 + 形状符号 + 文字三通道冗余</p>
+      </div>
+      <div class="state">
+        <span class="state__tag mono">禁用态</span>
+        <div class="state__body">
+          <span class="chip chip--disabled"><i class="chip__glyph" aria-hidden="true">✕</i>待解锁</span>
+        </div>
+        <p class="panel__note">降透去底 · 禁用形状保留</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 大数字读数 -->
+  <section class="panel">
+    <h2>大数字读数(仪表版)</h2>
+    <div class="show-grid">
+      <div class="state">
+        <span class="state__tag mono">正常值(core)</span>
+        <figure class="stat">
+          <span class="stat__value">+4.2<span class="stat__unit">%</span></span>
+          <span class="stat__label">过冲率 ◆</span>
+        </figure>
+        <p class="panel__note">青色窄辉光 · Mono 700 · 40–72px</p>
+      </div>
+      <div class="state">
+        <span class="state__tag mono">正常值(stat)</span>
+        <figure class="stat">
+          <span class="stat__value stat__value--sm mono">312<span class="stat__unit">ms</span></span>
+          <span class="stat__label">平均反应</span>
+        </figure>
+        <p class="panel__note">20px Mono 600 · 无辉光</p>
+      </div>
+      <div class="state">
+        <span class="state__tag mono">空态</span>
+        <figure class="stat stat--empty">
+          <span class="stat__value">--</span>
+          <span class="stat__label">过冲率</span>
+        </figure>
+        <p class="panel__note">"--" · 淡色无辉光</p>
+      </div>
+      <div class="state">
+        <span class="state__tag mono">载入态(静态)</span>
+        <figure class="stat stat--loading">
+          <span class="stat__value">--</span>
+          <span class="stat__live" aria-hidden="true"></span>
+          <span class="stat__label">采样中 ●</span>
+        </figure>
+        <p class="panel__note">数字灰化 + 黄色 live 环</p>
+      </div>
+      <div class="state">
+        <span class="state__tag mono">误差态</span>
+        <figure class="stat stat--error">
+          <span class="stat__value">--</span>
+          <span class="stat__note stat__note--danger">采样不足(&lt;30 次) · 再测一轮即可</span>
+        </figure>
+        <p class="panel__note">红色 + 下一步提示</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. 任务队列状态 -->
+  <section class="panel">
+    <h2>任务队列</h2>
+    <div class="show-grid">
+      <div class="state">
+        <span class="state__tag mono">各状态</span>
+        <nav class="tasklist">
+          <button type="button" class="task"><span class="task__no">01</span><span class="task__name">甩枪定位</span><span class="chip chip--ok" style="min-height:20px;padding:1px 6px"><i class="chip__glyph" aria-hidden="true">▲</i>完成</span></button>
+          <button type="button" class="task is-hover"><span class="task__no">02</span><span class="task__name">悬停态</span><span class="chip chip--info" style="min-height:20px;padding:1px 6px"><i class="chip__glyph" aria-hidden="true">●</i>排队</span></button>
+          <button type="button" class="task task--current"><span class="task__no">03</span><span class="task__name">平滑追踪</span><span class="chip chip--live" style="min-height:20px;padding:1px 6px"><i class="chip__glyph" aria-hidden="true">●</i>进行中</span></button>
+          <button type="button" class="task task--error"><span class="task__no">04</span><span class="task__name">误差态</span><span class="chip chip--danger" style="min-height:20px;padding:1px 6px"><i class="chip__glyph" aria-hidden="true">✕</i>无效</span></button>
+          <button type="button" class="task task--locked" disabled><span class="task__no">05</span><span class="task__name">锁定</span><span class="chip chip--disabled" style="min-height:20px;padding:1px 6px"><i class="chip__glyph" aria-hidden="true">✕</i>锁定</span></button>
+        </nav>
+        <p class="panel__note">current = 青色描边发光 · error = 红色底 · locked = 下沉</p>
+      </div>
+      <div class="state">
+        <span class="state__tag mono">空态</span>
+        <div class="task__empty">还没有任务 · 点按「进入测试」开始</div>
+        <p class="panel__note">虚线框 + 居中说明</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 弧形仪表 -->
+  <section class="panel">
+    <h2>弧形仪表</h2>
+    <div class="show-grid">
+      <div class="state">
+        <span class="state__tag mono">五仪表</span>
+        <div class="state__body state__body--col">
+          <div class="cluster__row" style="padding:var(--sh-4);gap:var(--sh-5)">
+            <div class="gauge">
+              <div class="gauge__dial">
+                <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M 15 85 A 42 42 0 0 1 85 85" class="gauge__arc-track"/><path d="M 15 85 A 42 42 0 0 1 68 28" class="gauge__arc-val gauge__val--warn" style="stroke-dasharray:88;stroke-dashoffset:38"/></svg>
+                <div class="gauge__read"><span class="gauge__num gauge__num--warn mono">+4.2%</span><span class="gauge__unit">OVERSHOOT</span></div>
+              </div>
+              <span class="gauge__cap">过冲率 ◆</span>
+            </div>
+            <div class="gauge">
+              <div class="gauge__dial">
+                <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M 15 85 A 42 42 0 0 1 85 85" class="gauge__arc-track"/><path d="M 15 85 A 42 42 0 0 1 50 43" class="gauge__arc-val gauge__val--ok" style="stroke-dasharray:88;stroke-dashoffset:48"/></svg>
+                <div class="gauge__read"><span class="gauge__num gauge__num--ok mono">63%</span><span class="gauge__unit">ACCURACY</span></div>
+              </div>
+              <span class="gauge__cap">命中率 ▲</span>
+            </div>
+            <div class="gauge">
+              <div class="gauge__dial">
+                <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M 15 85 A 42 42 0 0 1 85 85" class="gauge__arc-track"/><path d="M 15 85 A 42 42 0 0 1 62 32" class="gauge__arc-val gauge__val--cyan" style="stroke-dasharray:88;stroke-dashoffset:32"/></svg>
+                <div class="gauge__read"><span class="gauge__num gauge__num--cyan mono">312</span><span class="gauge__unit">MS</span></div>
+              </div>
+              <span class="gauge__cap">反应</span>
+            </div>
+          </div>
+        </div>
+        <p class="panel__note">静态 SVG 弧段 · rim 亮边 + 底部暗线</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. 裁决仪表 -->
+  <section class="panel">
+    <h2>主裁决仪表</h2>
+    <div class="verdict" style="margin:0 auto">
+      <div class="verdict__ring">
+        <svg viewBox="0 0 118 118" aria-hidden="true">
+          <circle cx="59" cy="59" r="50" fill="none" stroke="var(--ro-cyan-dim)" stroke-width="4"/>
+          <circle cx="59" cy="59" r="50" fill="none" stroke="var(--ro-warn)" stroke-width="4" stroke-dasharray="314" stroke-dashoffset="41" stroke-linecap="butt" transform="rotate(-90 59 59)" opacity="0.85"/>
+        </svg>
+        <div class="verdict__ring-core">
+          <span class="verdict__k">置信度</span>
+          <span class="mono" style="font-size:var(--fs-stat);font-weight:700;color:var(--ro-warn)">87%</span>
+        </div>
+      </div>
+      <div class="verdict__main">
+        <span class="verdict__verdict">偏快<span class="verdict__word">✕</span></span>
+        <span class="verdict__conf">收敛至 eDPI 760–800 后复测确认</span>
+      </div>
+      <div class="verdict__detail">
+        <p class="verdict__line">推荐区间 <span class="verdict__rec">0.95 – 1.00</span></p>
+        <p class="verdict__delta">对比上一轮:过冲率 <span class="verdict__up">+4.2% ↑1.1</span> · 置信度 <span class="verdict__up">87% ↑5</span></p>
+      </div>
+    </div>
+    <p class="panel__note">结论一句话 + 数字 + 对比,不可拆分</p>
+  </section>
+
+  <!-- 7. 色板 -->
+  <section class="panel">
+    <h2>色板</h2>
+    <div class="swatches">
+      <div class="swatch swatch--canvas"><span class="swatch__tok">--ro-canvas</span><span>#05080C</span></div>
+      <div class="swatch swatch--hull"><span class="swatch__tok">--ro-hull</span><span>#0C141D</span></div>
+      <div class="swatch swatch--hullhi"><span class="swatch__tok">--ro-hull-hi</span><span>#131E2A</span></div>
+      <div class="swatch swatch--text"><span class="swatch__tok swatch__on">--ro-text</span><span class="swatch__on">#DDE6EE</span></div>
+      <div class="swatch swatch--text2"><span class="swatch__tok">--ro-text-2</span><span>#8FA1B3</span></div>
+      <div class="swatch swatch--cyan"><span class="swatch__tok swatch__on">--ro-cyan</span><span class="swatch__on">#6FE3F5</span></div>
+      <div class="swatch swatch--cyandim"><span class="swatch__tok">--ro-cyan-dim</span><span>#0E3540</span></div>
+      <div class="swatch swatch--warn"><span class="swatch__tok swatch__on">--ro-warn</span><span class="swatch__on">#FFC53D</span></div>
+      <div class="swatch swatch--ok"><span class="swatch__tok swatch__on">--ro-ok</span><span class="swatch__on">#45E08A</span></div>
+      <div class="swatch swatch--danger"><span class="swatch__tok swatch__on">--ro-danger</span><span class="swatch__on">#FF4D45</span></div>
+      <div class="swatch swatch--info"><span class="swatch__tok swatch__on">--ro-info</span><span class="swatch__on">#7FA9FF</span></div>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>
