@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="校准档案原语展示:按钮状态、状态签、大数字读数(空/载入/误差)、任务索引、计量表、批注与红墨裁决。">
+<title>校准档案 · 原语展示 — Calibration Archive Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <span class="masthead-name">校准档案 · 原语展示</span>
+    <span>Primitive Showcase</span>
+    <a href="index.html">← 返回产品页</a>
+  </div>
+</header>
+
+<div class="volume">
+  <div class="volume-main">
+
+    <section class="title-page">
+      <p class="title-page-overline">PRIMITIVE SHOWCASE</p>
+      <h1>原语状态展示</h1>
+      <div class="title-rule" aria-hidden="true"></div>
+      <p class="title-page-sub">逐一展示本方向全部原语的 default / hover / active / focus / disabled / loading / empty / error 状态。视觉验收通过后才允许组合产品屏。</p>
+    </section>
+
+    <!-- 1. 按钮状态 -->
+    <section class="plate" aria-labelledby="btn-title">
+      <p class="plate-no">原语 1</p>
+      <h2 id="btn-title">盖章按钮</h2>
+      <div class="demo-grid">
+        <div class="demo-cell">
+          <h3>主按钮(红墨描边)</h3>
+          <div class="btn-row">
+            <button type="button" class="btn">默认</button>
+            <button type="button" class="btn state-hover">悬停</button>
+            <button type="button" class="btn state-active">按下</button>
+            <button type="button" class="btn" disabled>禁用</button>
+          </div>
+          <p class="demo-state-label">hover 换纸底 / active 红墨实填 / disabled 降亮</p>
+        </div>
+        <div class="demo-cell">
+          <h3>次按钮(发丝描边)</h3>
+          <div class="btn-row">
+            <button type="button" class="btn btn-secondary">默认</button>
+            <button type="button" class="btn btn-secondary state-hover">悬停</button>
+            <button type="button" class="btn btn-secondary state-active">按下</button>
+            <button type="button" class="btn btn-secondary" disabled>禁用</button>
+          </div>
+          <p class="demo-state-label">hover 换纸影底 / active 墨描边</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 状态签 -->
+    <section class="plate" aria-labelledby="chip-title">
+      <p class="plate-no">原语 2</p>
+      <h2 id="chip-title">状态签(编号戳形)</h2>
+      <div class="demo-grid">
+        <div class="demo-cell">
+          <h3>五语义</h3>
+          <div class="btn-row">
+            <span class="chip chip-ok"><i class="chip-glyph" aria-hidden="true">▲</i>达标</span>
+            <span class="chip chip-warn"><i class="chip-glyph" aria-hidden="true">◆</i>注意</span>
+            <span class="chip chip-danger"><i class="chip-glyph" aria-hidden="true">✕</i>不达标</span>
+            <span class="chip chip-info"><i class="chip-glyph" aria-hidden="true">●</i>提示</span>
+            <span class="chip chip-live"><i class="chip-glyph" aria-hidden="true">◐</i>进行中</span>
+          </div>
+          <p class="demo-state-label">颜色 + 形状符号 + 文字三通道冗余</p>
+        </div>
+        <div class="demo-cell">
+          <h3>禁用态</h3>
+          <div class="btn-row">
+            <span class="chip is-disabled"><i class="chip-glyph" aria-hidden="true">✕</i>待解锁</span>
+            <span class="stamp">登记 №12</span>
+          </div>
+          <p class="demo-state-label">disabled 降亮去边 / stamp 红墨盖章</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 大数字读数(空/载入/误差) -->
+    <section class="plate" aria-labelledby="stat-title">
+      <p class="plate-no">原语 3</p>
+      <h2 id="stat-title">大数字读数(图注版)</h2>
+      <div class="demo-grid">
+        <div class="demo-cell">
+          <h3>正常值</h3>
+          <div class="stat-stack">
+            <figure class="stat">
+              <span class="stat-label">过冲率<sup class="stat-sup">①</sup></span>
+              <span class="stat-leader" aria-hidden="true"></span>
+              <span class="stat-value">+4.2<span class="stat-unit" style="display:inline;margin-left:2px">%</span></span>
+            </figure>
+            <figure class="stat">
+              <span class="stat-label">命中率</span>
+              <span class="stat-leader" aria-hidden="true"></span>
+              <span class="stat-value is-hero">87%</span>
+            </figure>
+          </div>
+          <p class="demo-state-label">hero 尺寸 24px Mono / 普通 15px Mono</p>
+        </div>
+        <div class="demo-cell">
+          <h3>空态</h3>
+          <div class="stat-stack">
+            <figure class="stat">
+              <span class="stat-label">过冲率</span>
+              <span class="stat-leader" aria-hidden="true"></span>
+              <span class="stat-value is-empty">--</span>
+            </figure>
+          </div>
+          <p class="demo-state-label">"--" 占位,淡墨色</p>
+        </div>
+        <div class="demo-cell">
+          <h3>载入态(静态)</h3>
+          <div class="stat-stack">
+            <figure class="stat">
+              <span class="stat-label">过冲率</span>
+              <span class="stat-leader" aria-hidden="true"></span>
+              <span class="stat-value is-loading">--</span>
+              <span class="chip chip-live"><i class="chip-glyph" aria-hidden="true">◐</i>采样中</span>
+            </figure>
+          </div>
+          <p class="demo-state-label">数字灰化 + live 记号</p>
+        </div>
+        <div class="demo-cell">
+          <h3>误差态</h3>
+          <div class="stat-stack">
+            <figure class="stat is-error">
+              <span class="stat-label">过冲率</span>
+              <span class="stat-leader" aria-hidden="true"></span>
+              <span class="stat-value">--</span>
+              <span class="stat-foot">采样不足(&lt;30 次) · 再测一轮即可</span>
+            </figure>
+          </div>
+          <p class="demo-state-label">虚线引线 + 红墨脚注</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 任务索引 -->
+    <section class="plate" aria-labelledby="task-title">
+      <p class="plate-no">原语 4</p>
+      <h2 id="task-title">任务索引</h2>
+      <div class="demo-grid">
+        <div class="demo-cell">
+          <h3>各状态</h3>
+          <ul class="task-index">
+            <li><button type="button" class="task-row"><span class="task-no">3-1</span><span class="task-name">甩枪定位</span><span class="chip chip-ok"><i class="chip-glyph" aria-hidden="true">▲</i>完成</span></button></li>
+            <li><button type="button" class="task-row is-selected"><span class="task-no">3-2</span><span class="task-name">平滑追踪</span><span class="chip chip-live"><i class="chip-glyph" aria-hidden="true">◐</i>进行中</span></button></li>
+            <li><button type="button" class="task-row"><span class="task-no">3-3</span><span class="task-name">六目标铺面</span><span class="chip chip-info"><i class="chip-glyph" aria-hidden="true">●</i>排队中</span></button></li>
+            <li><button type="button" class="task-row state-disabled"><span class="task-no">3-5</span><span class="task-name">复测确认</span><span class="chip is-disabled"><i class="chip-glyph" aria-hidden="true">✕</i>待解锁</span></button></li>
+          </ul>
+          <p class="demo-state-label">selected = 红墨侧线 + 纸亮底</p>
+        </div>
+        <div class="demo-cell">
+          <h3>空态</h3>
+          <p class="task-list-empty">还没有任务 · 点按「新建测试轮」添加</p>
+          <p class="demo-state-label">虚线框 + 居中说明</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 批注 -->
+    <section class="plate" aria-labelledby="an-title">
+      <p class="plate-no">原语 5</p>
+      <h2 id="an-title">批注 / 图注引用</h2>
+      <div class="demo-cell">
+        <h3>编号上标 + 引线 + 图注</h3>
+        <p style="font:var(--ar-body);max-width:60ch">停点按目标角半径归一化<span class="an-ref">③</span>,越过边界才计入真实过冲。你的均值 +4.2%。</p>
+        <p class="an-inline">③ 过冲:准星越过靶心后回拉,以目标角半径归一化后的超出量。</p>
+        <p class="demo-state-label">上标红墨 · 窄屏收为行内括号注</p>
+      </div>
+    </section>
+
+    <!-- 6. 红墨裁决行 -->
+    <section class="plate" aria-labelledby="v-title">
+      <p class="plate-no">原语 6</p>
+      <h2 id="v-title">红墨裁决行</h2>
+      <div class="demo-cell">
+        <div class="verdict">
+          <p class="verdict-stamp">评定结果</p>
+          <p class="verdict-line">当前灵敏度偏快 —— 建议收敛至 <span class="verdict-figure">0.95 – 1.00</span></p>
+          <p class="verdict-delta">对比上一轮:过冲率 <span class="up">+4.2% ↑1.1</span> · 置信度 <span class="up">87% ↑5</span></p>
+        </div>
+        <p class="demo-state-label">结论一句 + 数字 + 对比,不拆分</p>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<footer class="colophon">
+  <div class="colophon-inner">
+    <span>校准档案 · 原语展示</span>
+    <a href="index.html">← 返回产品页</a>
+    <a href="../index.html">← 概念总览</a>
+  </div>
+</footer>
+
+</body>
+</html>

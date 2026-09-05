@@ -1,0 +1,1032 @@
+/* ============================================================================
+   B · Calibration Archive — 校准档案(纯视觉静态原型)
+   契约来源: /DESIGN.md §2.2 色彩 · §3.2 排印 · §4.3 布局 · §5.1 原语
+   §6 动效 · §7 纯平纸深度 · §8 无障碍
+   规则: 纸面零阴影;深度只来自三档纸色、发丝线、0.75px 引线与页边留白。
+   任何 hex 只允许出现在本文件 :root 的令牌表内(§2.2)。
+   ========================================================================= */
+
+:root {
+  /* ---- §2.2 B 色板(与 DESIGN.md 表逐项一致) ---- */
+  --ar-paper: #F6F2E8;      /* 纸:页面底 */
+  --ar-paper-hi: #FDFBF5;   /* 纸亮:标本卡纸面 */
+  --ar-paper-lo: #EDE7D8;   /* 纸影:页眉/表头等压深纸 */
+  --ar-ink: #191611;        /* 墨:标题/正文 */
+  --ar-ink-2: #5C564A;      /* 淡墨:图注/次文 */
+  --ar-hair: #C9C1AC;       /* 发丝线:细线框/引线/表格线 */
+  --ar-red: #A83A1C;        /* 红墨:批注、告警、编号戳 */
+  --ar-ok: #1F6B3F;         /* 达标批注 */
+  --ar-warn: #8A5A00;       /* 注意批注 */
+  --ar-danger: #A83A1C;     /* 危险即红笔批注 */
+  --ar-info: #1D4E79;       /* 蓝黑铅笔注 */
+
+  /* 红墨的两种稀释形态(由 --ar-red 派生,集中在此声明,不散落字面量) */
+  --ar-red-wash: rgba(168, 58, 28, 0.07);   /* 选中行纸底 */
+  --ar-red-band: rgba(168, 58, 28, 0.14);   /* 推荐区间带 */
+
+  /* ---- §4.1 共享基座(8px 基,微距 4px) ---- */
+  --sh-1: 4px;
+  --sh-2: 8px;
+  --sh-3: 12px;
+  --sh-4: 16px;
+  --sh-5: 24px;
+  --sh-6: 32px;
+  --sh-7: 48px;
+  --sh-8: 64px;
+  --sh-9: 96px;
+  --sh-10: 128px;
+
+  /* ---- §3.2 字族与层级(档案不喊叫,档案陈述) ---- */
+  --ar-font-serif: "Source Serif 4", "Noto Serif SC", "Source Han Serif SC", serif;
+  --ar-font-mono: "IBM Plex Mono", "Noto Serif SC", ui-monospace, monospace;
+  --ar-plate-title: 600 32px/1.25 var(--ar-font-serif);
+  --ar-h2: 600 22px/1.4 var(--ar-font-serif);
+  --ar-body: 400 17px/1.8 var(--ar-font-serif);
+  --ar-marginalia: 400 12px/1.5 var(--ar-font-mono);
+  --ar-datum: 600 15px/1.3 var(--ar-font-mono);
+  --ar-datum-lg: 600 24px/1.1 var(--ar-font-mono);
+
+  /* ---- §6 动效(micro 120ms;B 默认近乎零动效) ---- */
+  --ar-t-micro: 120ms;
+  --ar-ease: ease-out;
+}
+
+/* ---------------------------------------------------------------------------
+   0. 地基
+   --------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: clip; /* §4.1 根容器防横向溢出 */
+}
+
+body {
+  margin: 0;
+  background: var(--ar-paper);
+  color: var(--ar-ink);
+  font: var(--ar-body);
+  font-feature-settings: "liga" 1;
+  -webkit-text-size-adjust: 100%;
+}
+
+h1,
+h2,
+h3,
+p,
+figure {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/* §8 焦点环:2px、对比 ≥3:1(红墨对纸 ≈5.9:1)、offset 2px */
+:focus-visible,
+.state-focus {
+  outline: 2px solid var(--ar-red);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   1. 卷式骨架(§4.3 单卷手册流:72ch 内容栏 + ≥1280px 左侧 240px 页边注栏)
+   --------------------------------------------------------------------------- */
+
+.masthead {
+  background: var(--ar-paper-lo);
+  border-bottom: 3px double var(--ar-hair);
+}
+
+.masthead-inner {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: var(--sh-3) var(--sh-4);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  column-gap: var(--sh-4);
+  font: var(--ar-marginalia);
+  letter-spacing: 0.08em;
+  color: var(--ar-ink-2);
+}
+
+.masthead-name {
+  font-weight: 600;
+  color: var(--ar-ink);
+}
+
+.volume {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: var(--sh-7) var(--sh-4) var(--sh-9);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "main"
+    "notes";
+  column-gap: var(--sh-8);
+}
+
+.volume-main {
+  grid-area: main;
+  min-width: 0;
+  max-width: 72ch;
+}
+
+.marginalia {
+  grid-area: notes;
+  margin-top: var(--sh-8);
+  padding-top: var(--sh-4);
+  border-top: 1px solid var(--ar-hair);
+}
+
+.marginalia-heading {
+  font: var(--ar-marginalia);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--ar-ink-2);
+  margin-bottom: var(--sh-4);
+}
+
+.marginalia ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: none;
+}
+
+.note {
+  font: var(--ar-marginalia);
+  color: var(--ar-ink-2);
+  padding-left: var(--sh-5);
+  margin-bottom: var(--sh-4);
+  position: relative;
+}
+
+.note::before {
+  content: attr(data-no);
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 600;
+  color: var(--ar-red);
+}
+
+.note .note-title {
+  display: block;
+  font-weight: 600;
+  color: var(--ar-ink);
+}
+
+@media (min-width: 1280px) {
+  .volume {
+    grid-template-columns: 240px minmax(0, 72ch);
+    grid-template-areas: "notes main";
+    justify-content: center;
+  }
+
+  .marginalia {
+    margin-top: 0;
+    padding-top: var(--sh-2);
+    border-top: 0;
+    position: sticky;
+    top: var(--sh-4);
+    align-self: start;
+    max-width: 240px;
+  }
+}
+
+/* 通栏发丝线分隔"图版"(§4.3) */
+.plate {
+  border-top: 1px solid var(--ar-hair);
+  margin-top: var(--sh-8);
+  padding-top: var(--sh-6);
+}
+
+.plate:first-child {
+  border-top: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.plate-no {
+  font: var(--ar-marginalia);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--ar-ink-2);
+  margin-bottom: var(--sh-2);
+}
+
+.plate h2 {
+  font: var(--ar-h2);
+  margin-bottom: var(--sh-4);
+}
+
+.colophon-lead {
+  max-width: 68ch;
+}
+
+/* ---------------------------------------------------------------------------
+   2. 书名页(HeroPanel · BLK-1 题录式居中 + 副题,§5.1)
+   --------------------------------------------------------------------------- */
+
+.title-page {
+  text-align: center;
+  padding: var(--sh-8) 0 var(--sh-7);
+}
+
+.title-page-overline {
+  font: var(--ar-marginalia);
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  color: var(--ar-ink-2);
+  margin-bottom: var(--sh-5);
+}
+
+.title-page h1 {
+  font: var(--ar-plate-title);
+  max-width: min(68ch, 92vw); /* 超宽容器,中文主标题 ≤2 行 */
+  margin-inline: auto;
+}
+
+.title-rule {
+  width: var(--sh-10);
+  border-top: 1px solid var(--ar-hair);
+  margin: var(--sh-5) auto;
+}
+
+.title-page-sub {
+  font: var(--ar-body);
+  color: var(--ar-ink-2);
+  max-width: 46ch;
+  margin-inline: auto;
+}
+
+.title-page-stamp {
+  display: inline-block;
+  margin-top: var(--sh-5);
+}
+
+/* ---------------------------------------------------------------------------
+   3. 仪器铭牌(ParamReadout · BLK-2)
+   --------------------------------------------------------------------------- */
+
+.plate-card {
+  background: var(--ar-paper-hi);
+  border: 1px solid var(--ar-hair);
+  border-radius: 2px; /* §7:标本卡 2px,档案仅此一处圆角 */
+  padding: var(--sh-5) var(--sh-6);
+}
+
+.plate-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: var(--sh-3);
+  margin-bottom: var(--sh-4);
+}
+
+.plate-card-title {
+  font: var(--ar-h2);
+}
+
+/* 铭牌条目:引线式(标签 …… 数值),同目录页点线 */
+.readouts {
+  margin: 0;
+  display: grid;
+  gap: var(--sh-2);
+}
+
+.readout {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sh-2);
+  min-height: var(--sh-6);
+}
+
+.readout-label {
+  font: var(--ar-marginalia);
+  color: var(--ar-ink-2);
+  white-space: nowrap;
+}
+
+.leader {
+  flex: 1;
+  border-bottom: 1px solid var(--ar-hair);
+  transform: translateY(-0.25em);
+}
+
+.readout-value {
+  font: var(--ar-datum);
+  font-variant-numeric: tabular-nums;
+}
+
+.readout-unit {
+  font: var(--ar-marginalia);
+  color: var(--ar-ink-2);
+  margin-left: var(--sh-1);
+}
+
+/* ---------------------------------------------------------------------------
+   4. 标本卡 + 图版(Specimen Card · 签名构件)
+   --------------------------------------------------------------------------- */
+
+.specimen {
+  background: var(--ar-paper-hi);
+  border: 1px solid var(--ar-hair);
+  border-radius: 2px;
+  padding: var(--sh-5);
+}
+
+.specimen-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sh-3);
+  border-bottom: 1px solid var(--ar-hair);
+  padding-bottom: var(--sh-3);
+  margin-bottom: var(--sh-4);
+}
+
+.specimen-title {
+  font: var(--ar-plate-title);
+}
+
+.specimen-meta {
+  font: var(--ar-marginalia);
+  color: var(--ar-ink-2);
+  text-align: right;
+}
+
+.plate-figure {
+  margin-top: var(--sh-5);
+}
+
+.plate-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.plate-caption {
+  font: var(--ar-marginalia);
+  color: var(--ar-ink-2);
+  margin-top: var(--sh-3);
+  padding-top: var(--sh-2);
+  border-top: 1px solid var(--ar-hair);
+}
+
+/* SVG 图版内部用类引用令牌,不落裸色 */
+.svg-mono {
+  font: var(--ar-marginalia);
+}
+
+.svg-mono-strong {
+  font: 600 12px/1 var(--ar-font-mono);
+}
+
+.s-hair {
+  stroke: var(--ar-hair);
+}
+
+.s-ink {
+  stroke: var(--ar-ink);
+}
+
+.s-ink2 {
+  stroke: var(--ar-ink-2);
+}
+
+.s-red {
+  stroke: var(--ar-red);
+}
+
+.s-ok {
+  stroke: var(--ar-ok);
+}
+
+.s-info {
+  stroke: var(--ar-info);
+}
+
+.f-ink {
+  fill: var(--ar-ink);
+}
+
+.f-ink2 {
+  fill: var(--ar-ink-2);
+}
+
+.f-red {
+  fill: var(--ar-red);
+}
+
+.f-paper {
+  fill: var(--ar-paper-hi);
+}
+
+.f-none {
+  fill: none;
+}
+
+.leader-line {
+  stroke-width: 0.75; /* §7:引线 0.75px 细线 */
+}
+
+/* ---------------------------------------------------------------------------
+   5. 状态签 / 编号戳(StatusChip · B 形态 = 方框 + Mono)
+   --------------------------------------------------------------------------- */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sh-2);
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  padding: var(--sh-1) var(--sh-2);
+  min-height: var(--sh-6);
+  font: 600 12px/1.2 var(--ar-font-mono);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+/* 色彩独立:符号由类名单独着色,与文字同现(§8) */
+.chip-glyph {
+  font-weight: 600;
+  line-height: 1;
+}
+
+.chip-ok {
+  color: var(--ar-ok);
+}
+
+.chip-warn {
+  color: var(--ar-warn);
+}
+
+.chip-danger {
+  color: var(--ar-danger);
+}
+
+.chip-info {
+  color: var(--ar-info);
+}
+
+.chip-live {
+  color: var(--ar-ink-2);
+  border-style: dashed; /* live 的形状通道:虚线框 + ◐ + 文字 */
+}
+
+.chip-live .chip-glyph {
+  color: var(--ar-red);
+}
+
+.chip[disabled],
+.chip.is-disabled {
+  color: var(--ar-ink-2);
+  opacity: 0.55;
+  border: 1px solid transparent;
+}
+
+/* 红墨编号戳(档案编号/登记号) */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sh-2);
+  border: 2px solid var(--ar-red);
+  border-radius: 2px;
+  padding: var(--sh-1) var(--sh-3);
+  font: 600 12px/1.4 var(--ar-font-mono);
+  letter-spacing: 0.12em;
+  color: var(--ar-red);
+  transform: rotate(-1.2deg); /* 盖章的实物感,静态,非装饰动效 */
+}
+
+/* ---------------------------------------------------------------------------
+   6. 大数字读数(NumStat · B 图注版:编号引线 + 15–24px)
+   --------------------------------------------------------------------------- */
+
+.stat {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  column-gap: var(--sh-2);
+  padding: var(--sh-2) 0;
+}
+
+.stat-label {
+  font: var(--ar-marginalia);
+  color: var(--ar-ink-2);
+}
+
+.stat-sup {
+  color: var(--ar-red);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.stat-leader {
+  border-bottom: 1px solid var(--ar-hair);
+  transform: translateY(-0.25em);
+}
+
+.stat-value {
+  font: var(--ar-datum);
+  font-variant-numeric: tabular-nums;
+  grid-column: 3;
+}
+
+.stat-value.is-hero {
+  font: var(--ar-datum-lg);
+}
+
+.stat-unit {
+  grid-column: 3;
+  justify-self: start;
+  font: var(--ar-marginalia);
+  color: var(--ar-ink-2);
+  margin-top: var(--sh-1);
+}
+
+.stat-foot {
+  grid-column: 1 / -1;
+  font: var(--ar-marginalia);
+  color: var(--ar-ink-2);
+}
+
+/* 可点进明细的实例才有 hover(§5.1:禁位移,只换一档纸底) */
+.stat.is-link {
+  display: grid;
+  width: 100%;
+  text-align: start;
+  padding: var(--sh-2);
+  border: 1px solid transparent;
+  transition: background-color var(--ar-t-micro) var(--ar-ease);
+}
+
+.stat.is-link:hover,
+.stat.is-link.state-hover {
+  background: var(--ar-paper-lo);
+}
+
+.stat.is-link:active,
+.stat.is-link.state-active {
+  background: var(--ar-paper-hi);
+  border-color: var(--ar-hair);
+}
+
+/* empty:显示 "--" */
+.stat-value.is-empty {
+  color: var(--ar-ink-2);
+}
+
+/* loading(静态):数字灰化 + live 记号 */
+.stat-value.is-loading {
+  color: var(--ar-hair);
+}
+
+.stat .chip-live {
+  justify-self: end;
+  grid-column: 3;
+}
+
+/* error:单格 danger 注记 + 虚线引线 */
+.stat.is-error .stat-leader {
+  border-bottom-style: dashed;
+  border-bottom-color: var(--ar-danger);
+}
+
+.stat.is-error .stat-foot {
+  color: var(--ar-danger);
+}
+
+.stat-stack {
+  display: grid;
+  gap: var(--sh-1);
+}
+
+/* ---------------------------------------------------------------------------
+   7. 任务队列(TaskList · B 编号图版索引)
+   --------------------------------------------------------------------------- */
+
+.task-index {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--ar-hair);
+}
+
+.task-index > li + li {
+  border-top: 1px solid var(--ar-hair);
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sh-3);
+  width: 100%;
+  min-height: 44px; /* §8 触控目标 */
+  padding: var(--sh-3) var(--sh-2);
+  text-align: start;
+  border-left: 2px solid transparent;
+  transition: background-color var(--ar-t-micro) var(--ar-ease);
+}
+
+.task-no {
+  font: var(--ar-datum);
+  color: var(--ar-ink-2);
+  flex: none;
+}
+
+.task-name {
+  font: var(--ar-body);
+  min-width: 0;
+  flex: 1;
+}
+
+.task-name .an-ref {
+  margin-left: var(--sh-1);
+}
+
+.task-row:hover:not([disabled]),
+.task-row.state-hover {
+  background: var(--ar-paper-lo);
+}
+
+.task-row:active:not([disabled]) {
+  background: var(--ar-paper);
+}
+
+.task-row.is-selected {
+  background: var(--ar-red-wash);
+  border-left-color: var(--ar-red); /* 选中 = 红墨侧线 + 纸亮底 */
+}
+
+.task-row:disabled,
+.task-row.state-disabled {
+  color: var(--ar-ink-2);
+  border-left-color: transparent;
+  cursor: not-allowed;
+}
+
+.task-row.state-disabled .task-no {
+  color: var(--ar-hair);
+}
+
+.task-list-empty {
+  font: var(--ar-marginalia);
+  color: var(--ar-ink-2);
+  border: 1px dashed var(--ar-hair);
+  border-radius: 2px;
+  padding: var(--sh-4);
+  text-align: center;
+}
+
+/* ---------------------------------------------------------------------------
+   8. 计量表(MetricPanel · 全发丝线,表头压深纸,数字右对齐)
+   --------------------------------------------------------------------------- */
+
+.metric-table {
+  width: 100%;
+  font: var(--ar-body);
+}
+
+.metric-table caption {
+  font: var(--ar-marginalia);
+  color: var(--ar-ink-2);
+  text-align: start;
+  margin-bottom: var(--sh-2);
+}
+
+.metric-table th,
+.metric-table td {
+  border: 1px solid var(--ar-hair);
+  padding: var(--sh-2) var(--sh-3);
+  vertical-align: baseline;
+}
+
+.metric-table thead th {
+  background: var(--ar-paper-lo);
+  font: var(--ar-marginalia);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ar-ink-2);
+  text-align: start;
+}
+
+.metric-table td.num {
+  font: var(--ar-datum);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.metric-table .num.is-danger {
+  color: var(--ar-danger);
+}
+
+.metric-table .num.is-ok {
+  color: var(--ar-ok);
+}
+
+.metric-table .num.is-best {
+  font-weight: 700; /* 列内最优:只加粗,不染色(颜色留给语义状态) */
+}
+
+.metric-table .td-note {
+  font: var(--ar-marginalia);
+  color: var(--ar-danger);
+}
+
+.metric-table tfoot td {
+  background: var(--ar-paper-lo);
+  color: var(--ar-ink-2);
+  font: var(--ar-marginalia);
+}
+
+.table-scroll {
+  overflow-x: auto; /* 窄屏表格内部滚动,主内容不横向溢出 */
+}
+
+/* ---------------------------------------------------------------------------
+   9. 批注 / 图注引用(Annotation · 编号上标 + 引线 + Mono 图注)
+   --------------------------------------------------------------------------- */
+
+.an-ref {
+  font-family: var(--ar-font-mono);
+  font-size: 0.72em;
+  line-height: 1;
+  vertical-align: super;
+  color: var(--ar-red);
+  text-decoration: none;
+  padding: 0 var(--sh-1);
+  border-radius: 2px;
+}
+
+.an-ref:hover {
+  text-decoration: underline;
+}
+
+/* 375px:引线收为行内括号注由结构本身保证(上标 + 行内文字),无横向溢出 */
+.an-inline {
+  font: var(--ar-marginalia);
+  color: var(--ar-ink-2);
+}
+
+/* ---------------------------------------------------------------------------
+   10. 红墨裁决行(VerdictBand · BLK-5:结论一句 + 数字 + 与上轮对比,不拆分)
+   --------------------------------------------------------------------------- */
+
+.verdict {
+  border-top: 2px solid var(--ar-red);
+  padding-top: var(--sh-4);
+  margin-top: var(--sh-6);
+  display: grid;
+  gap: var(--sh-2);
+}
+
+.verdict-stamp {
+  font: var(--ar-marginalia);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--ar-red);
+}
+
+.verdict-line {
+  font: var(--ar-h2); /* --ar-h2 已含 600 字重 */
+  color: var(--ar-red);
+}
+
+.verdict-line .verdict-figure {
+  font: var(--ar-datum-lg);
+  color: var(--ar-red);
+}
+
+.verdict-delta {
+  font: var(--ar-marginalia);
+  color: var(--ar-ink-2);
+}
+
+.verdict-delta .up {
+  color: var(--ar-ok);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+   11. 轮次登记簿(HistoryRail · 档案末页登记表)
+   --------------------------------------------------------------------------- */
+
+.history-table {
+  width: 100%;
+}
+
+/* ---------------------------------------------------------------------------
+   12. 盖章按钮(ActionButton · B:方角 2px、红墨描边)
+   --------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sh-2);
+  min-height: 44px;
+  padding: var(--sh-2) var(--sh-5);
+  border: 1px solid var(--ar-red);
+  border-radius: 2px;
+  font: var(--ar-body);
+  font-weight: 600;
+  color: var(--ar-red);
+  background: transparent;
+  transition: background-color var(--ar-t-micro) var(--ar-ease),
+    border-color var(--ar-t-micro) var(--ar-ease);
+}
+
+.btn:hover,
+.btn.state-hover {
+  background: var(--ar-red-wash);
+}
+
+.btn:active,
+.btn.state-active {
+  background: var(--ar-red);
+  color: var(--ar-paper-hi);
+  border-width: 2px; /* 盖下去:笔锋压粗 */
+}
+
+.btn[disabled],
+.btn.state-disabled {
+  color: var(--ar-ink-2);
+  border-color: var(--ar-hair);
+  background: transparent;
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  border-color: var(--ar-hair);
+  color: var(--ar-ink);
+}
+
+.btn-secondary:hover,
+.btn-secondary.state-hover {
+  background: var(--ar-paper-lo);
+}
+
+.btn-secondary:active,
+.btn-secondary.state-active {
+  background: var(--ar-paper-hi);
+  border-color: var(--ar-ink);
+  color: var(--ar-ink);
+  border-width: 1px;
+}
+
+.btn-secondary[disabled],
+.btn-secondary.state-disabled {
+  color: var(--ar-ink-2);
+  border-color: var(--ar-hair);
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sh-3);
+  margin-top: var(--sh-5);
+}
+
+/* ---------------------------------------------------------------------------
+   13. 卷尾
+   --------------------------------------------------------------------------- */
+
+.colophon {
+  border-top: 3px double var(--ar-hair);
+  background: var(--ar-paper-lo);
+  color: var(--ar-ink-2);
+  font: var(--ar-marginalia);
+}
+
+.colophon-inner {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: var(--sh-5) var(--sh-4);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--sh-3);
+}
+
+/* ---------------------------------------------------------------------------
+   14. Showcase 辅助
+   --------------------------------------------------------------------------- */
+
+.demo-grid {
+  display: grid;
+  gap: var(--sh-5);
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+}
+
+.demo-cell {
+  border: 1px solid var(--ar-hair);
+  border-radius: 2px;
+  padding: var(--sh-4);
+  background: var(--ar-paper-hi);
+  display: grid;
+  gap: var(--sh-3);
+}
+
+.demo-cell > h3 {
+  font: 600 17px/1.4 var(--ar-font-serif);
+}
+
+.demo-state-label {
+  font: var(--ar-marginalia);
+  color: var(--ar-ink-2);
+  border-top: 1px solid var(--ar-hair);
+  padding-top: var(--sh-1);
+}
+
+.demo-figure {
+  border: 1px solid var(--ar-hair);
+  padding: var(--sh-3);
+  background: var(--ar-paper);
+}
+
+/* ---------------------------------------------------------------------------
+   15. 窄屏收敛(§4.1:375px 单列、主内容无横向滚动)
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 639px) {
+  .volume {
+    padding: var(--sh-6) var(--sh-3) var(--sh-8);
+    row-gap: var(--sh-7);
+  }
+
+  .title-page {
+    padding: var(--sh-6) 0 var(--sh-5);
+  }
+
+  .title-page h1 {
+    font-size: 26px;
+  }
+
+  .specimen,
+  .plate-card {
+    padding: var(--sh-4) var(--sh-3);
+  }
+
+  .specimen-meta {
+    text-align: start;
+  }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sh-2);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   16. prefers-reduced-motion(§6:全量降为 0ms,静态氛围保留)
+   --------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
