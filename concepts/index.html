@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CS2 灵敏度测试器 UI 概念总览:三套结构不同的视觉方向——赛事导播台、校准档案、靶场座舱。选择一套进入下一步。">
+<title>概念总览 · CS2 灵敏度测试器 UI</title>
+<style>
+  :root {
+    --bg: #07090D;
+    --surface: #0F131A;
+    --surface-hi: #161B24;
+    --text: #E8ECF2;
+    --text-2: #8A93A3;
+    --text-3: #4A5260;
+    --accent: #6FE3F5;
+    --accent-dim: #0E3540;
+    --warn: #FFC53D;
+    --ok: #45E08A;
+    --danger: #FF4D45;
+    --info: #7FA9FF;
+    --border: #1E2630;
+    --sh-1: 4px; --sh-2: 8px; --sh-3: 12px; --sh-4: 16px; --sh-5: 24px;
+    --sh-6: 32px; --sh-7: 48px; --sh-8: 64px;
+    --font: "Chakra Petch", "Noto Sans SC", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { overflow-x: clip; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: "";
+    position: fixed; inset: 0; z-index: -1;
+    background: radial-gradient(90% 70% at 50% 30%, #0C1119 0%, var(--bg) 70%);
+  }
+  a { color: inherit; text-decoration: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .wrap {
+    max-width: 1400px;
+    margin-inline: auto;
+    padding: var(--sh-7) var(--sh-4) var(--sh-9);
+  }
+
+  /* ── 刊头 ── */
+  .head { text-align: center; margin-bottom: var(--sh-8); }
+  .head__overline {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    margin-bottom: var(--sh-4);
+  }
+  .head__title {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: var(--sh-4);
+  }
+  .head__title em { color: var(--accent); font-style: normal; }
+  .head__sub {
+    max-width: 56ch;
+    margin-inline: auto;
+    color: var(--text-2);
+    font-size: 17px;
+  }
+  .head__note {
+    margin-top: var(--sh-4);
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-3);
+  }
+
+  /* ── 三概念卡片网格 ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr));
+    gap: var(--sh-6);
+  }
+
+  .card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    overflow: hidden;
+    transition: border-color 200ms ease-out, transform 200ms ease-out;
+  }
+  .card:hover {
+    border-color: var(--accent-dim);
+    transform: translateY(-2px);
+  }
+  .card:focus-within { border-color: var(--accent); }
+
+  /* 卡片顶部预览条(每方向一个迷你签名图形) */
+  .card__preview {
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .card__preview svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  /* A · Broadcast Grid 预览:Scorebug 条 */
+  .preview-a { background: #0B0D11; }
+  .preview-a::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 56px;
+    background: #1B202A;
+    border-top: 2px solid #FFB02E;
+  }
+
+  /* B · Calibration Archive 预览:纸+红墨 */
+  .preview-b { background: #F6F2E8; }
+  .preview-b svg text { font-family: var(--mono); }
+
+  /* C · Range OS 预览:靶道灭点 */
+  .preview-c { background: #05080C; }
+
+  .card__body { padding: var(--sh-5) var(--sh-5) var(--sh-6); }
+  .card__ns {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: var(--sh-2);
+  }
+  .card__name {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: var(--sh-3);
+  }
+  .card__name--a { color: #FFB02E; }
+  .card__name--b { color: #A83A1C; }
+  .card__name--c { color: var(--accent); }
+  .card__desc {
+    color: var(--text-2);
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: var(--sh-5);
+  }
+  .card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sh-2);
+    margin-bottom: var(--sh-5);
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+  }
+  .card__links {
+    display: flex;
+    gap: var(--sh-3);
+    flex-wrap: wrap;
+  }
+  .link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sh-2);
+    min-height: 40px;
+    padding: var(--sh-2) var(--sh-4);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    border: 1px solid var(--accent-dim);
+    color: var(--accent);
+    transition: background-color 120ms ease-out;
+  }
+  .link:hover { background: rgba(111,227,245,0.08); }
+  .link--ghost {
+    border-color: var(--border);
+    color: var(--text-2);
+  }
+  .link--ghost:hover { background: var(--surface-hi); }
+
+  /* ── 对比表 ── */
+  .compare {
+    margin-top: var(--sh-9);
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .compare table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 640px;
+    font-size: 14px;
+  }
+  .compare th, .compare td {
+    border: 1px solid var(--border);
+    padding: var(--sh-3) var(--sh-4);
+    text-align: start;
+    vertical-align: top;
+  }
+  .compare thead th {
+    background: var(--surface-hi);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+  .compare thead th:nth-child(1) { color: var(--text-3); }
+  .compare thead th:nth-child(2) { color: #FFB02E; }
+  .compare thead th:nth-child(3) { color: #C97A5A; }
+  .compare thead th:nth-child(4) { color: var(--accent); }
+  .compare td:first-child {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-2);
+    letter-spacing: 0.06em;
+  }
+  .compare td { color: var(--text); }
+
+  /* ── 页脚 ── */
+  .foot {
+    margin-top: var(--sh-8);
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-3);
+  }
+  .foot a { color: var(--text-2); }
+  .foot a:hover { color: var(--accent); }
+
+  @media (max-width: 639px) {
+    .wrap { padding: var(--sh-6) var(--sh-3) var(--sh-8); }
+    .head__title { font-size: 26px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="head">
+    <p class="head__overline">CS2 SENSITIVITY TESTER · UI CONCEPTS</p>
+    <h1 class="head__title">三套视觉方向,选一套进入下一步</h1>
+    <p class="head__sub">三套方向结构完全不同——不是换色,是三种信息架构。都基于练枪软件的设计语言,没有沿用你当前的 UI。先看整体效果,选定了再接线功能。</p>
+    <p class="head__note">纯视觉静态原型 · 无功能 · 现有应用未改动</p>
+  </header>
+
+  <main class="grid">
+
+    <!-- ═══ A · Broadcast Grid ═══ -->
+    <article class="card">
+      <div class="card__preview preview-a">
+        <!-- 迷你 Scorebug 预览 -->
+        <svg viewBox="0 0 380 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <!-- 顶部信号带 -->
+          <rect x="0" y="0" width="380" height="28" fill="#0B0D11"/>
+          <rect x="0" y="28" width="380" height="1" fill="#262C36"/>
+          <text x="16" y="19" fill="#ECEEF2" font-family="monospace" font-size="11" font-weight="600">灵敏度导播台</text>
+          <text x="280" y="19" fill="#A6ACB8" font-family="monospace" font-size="11">12:47</text>
+          <!-- 网格区暗示 -->
+          <line x1="16" y1="50" x2="364" y2="50" stroke="#262C36" stroke-width="1"/>
+          <line x1="16" y1="80" x2="364" y2="80" stroke="#262C36" stroke-width="1"/>
+          <line x1="100" y1="40" x2="100" y2="124" stroke="#262C36" stroke-width="1"/>
+          <line x1="280" y1="40" x2="280" y2="124" stroke="#262C36" stroke-width="1"/>
+          <text x="24" y="62" fill="#A6ACB8" font-family="monospace" font-size="10">任务队列</text>
+          <text x="110" y="62" fill="#A6ACB8" font-family="monospace" font-size="10">主分析场</text>
+          <text x="290" y="62" fill="#A6ACB8" font-family="monospace" font-size="10">实时指标</text>
+          <circle cx="180" cy="100" r="20" fill="none" stroke="#262C36" stroke-width="1"/>
+          <circle cx="180" cy="100" r="10" fill="none" stroke="#262C36" stroke-width="1"/>
+          <line x1="180" y1="90" x2="180" y2="110" stroke="#262C36" stroke-width="1"/>
+          <line x1="170" y1="100" x2="190" y2="100" stroke="#262C36" stroke-width="1"/>
+        </svg>
+        <!-- Scorebug 条(CSS ::after 绘制) -->
+        <div style="position:absolute;bottom:0;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:1">
+          <span style="font-family:monospace;font-size:11px;color:#FFB02E;letter-spacing:0.1em">推荐 0.95–1.00</span>
+          <span style="font-family:monospace;font-size:28px;font-weight:700;color:#ECEEF2;letter-spacing:-0.02em">87%</span>
+          <span style="font-family:monospace;font-size:10px;color:#A6ACB8">置信度 ▲ 高</span>
+        </div>
+      </div>
+      <div class="card__body">
+        <p class="card__ns">A · --bc- namespace</p>
+        <h2 class="card__name card__name--a">赛事导播台 · Broadcast Grid</h2>
+        <p class="card__desc">你正在被转播。一块竞赛数据导播屏:冷灰演播室、琥珀信号、顶部状态带、12 列稠密网格,底部横贯的 Scorebug 裁决条以巨型等宽数字砸出置信判定。</p>
+        <div class="card__tags">
+          <span class="tag">深炭蓝灰</span>
+          <span class="tag">琥珀信号</span>
+          <span class="tag">Saira Condensed</span>
+          <span class="tag">JetBrains Mono</span>
+          <span class="tag">平表面 · 细线</span>
+          <span class="tag">Scorebug 签名</span>
+        </div>
+        <div class="card__links">
+          <a class="link" href="broadcast-grid/index.html">查看产品页</a>
+          <a class="link link--ghost" href="broadcast-grid/showcase.html">原语展示</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- ═══ B · Calibration Archive ═══ -->
+    <article class="card">
+      <div class="card__preview preview-b">
+        <!-- 迷你标本卡预览 -->
+        <svg viewBox="0 0 380 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <rect width="380" height="180" fill="#F6F2E8"/>
+          <!-- 页眉双线 -->
+          <line x1="20" y1="24" x2="360" y2="24" stroke="#C9C1AC" stroke-width="1"/>
+          <line x1="20" y1="27" x2="360" y2="27" stroke="#C9C1AC" stroke-width="1"/>
+          <text x="20" y="18" fill="#5C564A" font-size="10" font-weight="600">CS2 灵敏度校准档案 · 第 Ⅳ 卷</text>
+          <!-- 标本卡框 -->
+          <rect x="40" y="44" width="300" height="100" fill="#FDFBF5" stroke="#C9C1AC" stroke-width="1" rx="2"/>
+          <!-- 拟合曲线 -->
+          <path d="M 60 120 Q 190 56 340 100" fill="none" stroke="#5C564A" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <!-- 散点 -->
+          <circle cx="60" cy="122" r="3" fill="#5C564A"/>
+          <circle cx="130" cy="88" r="3" fill="#5C564A"/>
+          <circle cx="190" cy="56" r="4" fill="#A83A1C"/>
+          <circle cx="190" cy="56" r="7" fill="none" stroke="#A83A1C" stroke-width="1"/>
+          <circle cx="270" cy="84" r="3" fill="#5C564A"/>
+          <circle cx="340" cy="102" r="3" fill="#5C564A"/>
+          <!-- 红墨推荐带 -->
+          <rect x="155" y="44" width="70" height="100" fill="rgba(168,58,28,0.12)"/>
+          <!-- 引线 -->
+          <line x1="190" y1="56" x2="230" y2="70" stroke="#A83A1C" stroke-width="0.75"/>
+          <text x="234" y="74" fill="#A83A1C" font-size="9" font-weight="600">峰值 87 · 1.02</text>
+          <!-- 底部红墨裁决线 -->
+          <line x1="40" y1="152" x2="340" y2="152" stroke="#A83A1C" stroke-width="2"/>
+          <text x="40" y="166" fill="#A83A1C" font-size="11" font-weight="600">评定:偏快 — 收敛至 0.95–1.00</text>
+        </svg>
+      </div>
+      <div class="card__body">
+        <p class="card__ns">B · --ar- namespace</p>
+        <h2 class="card__name card__name--b">校准档案 · Calibration Archive</h2>
+        <p class="card__desc">一本仪器计量手册。暖纸、碳墨、发丝线、页边批注;标本卡装裱本轮结果,细引线连接图与注,纸面上唯一的颜色是红墨批注。档案不喊叫,档案陈述。</p>
+        <div class="card__tags">
+          <span class="tag">暖纸底</span>
+          <span class="tag">红墨批注</span>
+          <span class="tag">Source Serif 4</span>
+          <span class="tag">IBM Plex Mono</span>
+          <span class="tag">纯平纸 · 零阴影</span>
+          <span class="tag">标本卡签名</span>
+        </div>
+        <div class="card__links">
+          <a class="link" href="calibration-archive/index.html">查看产品页</a>
+          <a class="link link--ghost" href="calibration-archive/showcase.html">原语展示</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- ═══ C · Range OS ═══ -->
+    <article class="card">
+      <div class="card__preview preview-c">
+        <!-- 迷你靶道灭点预览 -->
+        <svg viewBox="0 0 380 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <rect width="380" height="180" fill="#05080C"/>
+          <radialGradient id="glow-c" cx="50%" cy="40%" r="30%">
+            <stop offset="0%" stop-color="#6FE3F5" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#05080C" stop-opacity="0"/>
+          </radialGradient>
+          <rect width="380" height="180" fill="url(#glow-c)"/>
+          <!-- 隧道框 -->
+          <rect x="30" y="30" width="320" height="100" fill="none" stroke="#0E3540" stroke-width="1.5"/>
+          <rect x="80" y="50" width="220" height="60" fill="none" stroke="#0E3540" stroke-width="1" opacity="0.6"/>
+          <rect x="130" y="65" width="120" height="30" fill="none" stroke="#0E3540" stroke-width="0.75" opacity="0.3"/>
+          <!-- 灭点透视线 -->
+          <line x1="30" y1="30" x2="190" y2="80" stroke="#0E3540" stroke-width="1" opacity="0.7"/>
+          <line x1="350" y1="30" x2="190" y2="80" stroke="#0E3540" stroke-width="1" opacity="0.7"/>
+          <line x1="30" y1="130" x2="190" y2="80" stroke="#0E3540" stroke-width="1" opacity="0.7"/>
+          <line x1="350" y1="130" x2="190" y2="80" stroke="#0E3540" stroke-width="1" opacity="0.7"/>
+          <!-- 地平线 -->
+          <line x1="0" y1="80" x2="380" y2="80" stroke="#6FE3F5" stroke-width="0.5" opacity="0.4"/>
+          <!-- 靶标 -->
+          <circle cx="190" cy="80" r="3" fill="none" stroke="#FFC53D" stroke-width="1.5"/>
+          <circle cx="190" cy="80" r="1" fill="#FFC53D"/>
+          <circle cx="250" cy="95" r="5" fill="none" stroke="#FFC53D" stroke-width="1.5"/>
+          <circle cx="250" cy="95" r="1.5" fill="#FFC53D"/>
+          <!-- 准星 -->
+          <line x1="184" y1="80" x2="187" y2="80" stroke="#6FE3F5" stroke-width="1"/>
+          <line x1="193" y1="80" x2="196" y2="80" stroke="#6FE3F5" stroke-width="1"/>
+          <line x1="190" y1="74" x2="190" y2="77" stroke="#6FE3F5" stroke-width="1"/>
+          <line x1="190" y1="83" x2="190" y2="86" stroke="#6FE3F5" stroke-width="1"/>
+          <!-- HUD 角括号 -->
+          <path d="M 6 6 L 6 18 M 6 6 L 18 6" stroke="#6FE3F5" stroke-width="1.5" fill="none"/>
+          <path d="M 374 6 L 374 18 M 374 6 L 362 6" stroke="#6FE3F5" stroke-width="1.5" fill="none"/>
+          <!-- 底部仪表簇暗示 -->
+          <rect x="0" y="140" width="380" height="40" fill="#0C141D"/>
+          <circle cx="80" cy="160" r="12" fill="none" stroke="#0E3540" stroke-width="3"/>
+          <path d="M 72 160 A 8 8 0 0 1 84 152" fill="none" stroke="#FFC53D" stroke-width="3"/>
+          <circle cx="160" cy="160" r="12" fill="none" stroke="#0E3540" stroke-width="3"/>
+          <path d="M 152 160 A 8 8 0 0 1 164 154" fill="none" stroke="#6FE3F5" stroke-width="3"/>
+          <circle cx="240" cy="160" r="12" fill="none" stroke="#0E3540" stroke-width="3"/>
+          <path d="M 232 160 A 8 8 0 0 1 240 152" fill="none" stroke="#45E08A" stroke-width="3"/>
+          <circle cx="320" cy="160" r="12" fill="none" stroke="#0E3540" stroke-width="3"/>
+          <path d="M 312 160 A 8 8 0 0 1 320 152" fill="none" stroke="#7FA9FF" stroke-width="3"/>
+        </svg>
+      </div>
+      <div class="card__body">
+        <p class="card__ns">C · --ro- namespace</p>
+        <h2 class="card__name card__name--c">靶场座舱 · Range OS</h2>
+        <p class="card__desc">训练舱操作系统开机。全屏座舱,中央梯形遮光罩内是透视靶道窗——灭点收缩、纵深靶标、地平线光透出;边缘 HUD 控件,底部仪表簇与主裁决仪表。</p>
+        <div class="card__tags">
+          <span class="tag">深空蓝黑</span>
+          <span class="tag">青色窄辉光</span>
+          <span class="tag">Chakra Petch</span>
+          <span class="tag">JetBrains Mono</span>
+          <span class="tag">受光舱体 · rim light</span>
+          <span class="tag">透视靶道窗签名</span>
+        </div>
+        <div class="card__links">
+          <a class="link" href="range-os/index.html">查看产品页</a>
+          <a class="link link--ghost" href="range-os/showcase.html">原语展示</a>
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- ── 对比表 ── -->
+  <section class="compare" aria-label="三方向对比">
+    <table>
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>A · Broadcast Grid</th>
+          <th>B · Calibration Archive</th>
+          <th>C · Range OS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>场景身份</td>
+          <td>赛事转播导播屏</td>
+          <td>仪器计量手册</td>
+          <td>训练舱操作系统</td>
+        </tr>
+        <tr>
+          <td>底色</td>
+          <td>冷灰深炭蓝 #0B0D11</td>
+          <td>暖纸 #F6F2E8</td>
+          <td>深空 #05080C</td>
+        </tr>
+        <tr>
+          <td>强调色</td>
+          <td>琥珀 #FFB02E</td>
+          <td>红墨 #A83A1C</td>
+          <td>青色 #6FE3F5</td>
+        </tr>
+        <tr>
+          <td>排版人格</td>
+          <td>窄体大写 + 等宽记分条</td>
+          <td>衬线铅字 + 等宽计量</td>
+          <td>科技切角 + 等宽遥测</td>
+        </tr>
+        <tr>
+          <td>深度策略</td>
+          <td>线条 + 色阶,Scorebug 浮起</td>
+          <td>纯平纸,引线制造层</td>
+          <td>rim light + 暗角 + 窄辉光</td>
+        </tr>
+        <tr>
+          <td>签名瞬间</td>
+          <td>底部 Scorebug 裁决条</td>
+          <td>标本卡 + 红墨裁决行</td>
+          <td>透视靶道窗 + 仪表簇</td>
+        </tr>
+        <tr>
+          <td>信息架构</td>
+          <td>固定壳 + 12 列网格</td>
+          <td>单卷手册 + 页边注栏</td>
+          <td>座舱 grid + 视口优先</td>
+        </tr>
+        <tr>
+          <td>最适合</td>
+          <td>P1 竞技玩家 · 要信心</td>
+          <td>P2 分析型玩家 · 要证据</td>
+          <td>P1 仪式感 + P3 低注意力</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer class="foot">
+    <p>选好后告诉我编号(A / B / C),我会在选定方向上接线功能。</p>
+    <p style="margin-top:var(--sh-2)">· <a href="../index.html">返回当前应用</a> · <a href="../DESIGN.md">设计契约</a> ·</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
