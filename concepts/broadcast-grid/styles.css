@@ -1,0 +1,756 @@
+/* ==========================================================================
+   Broadcast Grid — 赛事导播台 (Direction A)
+   Pure visual prototype. Zero build, vanilla HTML/CSS, no JS behaviour.
+   Every colour lives in :root as a --bc- token; no raw hex/rgb outside.
+   Contract source: ../DESIGN.md §2.1 / §3.1 / §4.2 / §5.1 / §6 / §7
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. TOKENS (:root) — DESIGN.md §2.1 palette, §4.1 shared scale,
+      §3.1 type stacks, §6 motion, §7 A-depth.
+   -------------------------------------------------------------------------- */
+:root {
+  /* Surface hierarchy (canvas → panel → raised) */
+  --bc-canvas: #0B0D11;
+  --bc-panel: #12151B;
+  --bc-panel-hi: #181C24;
+  --bc-score: #1B202A;
+
+  /* Text */
+  --bc-text: #ECEEF2;
+  --bc-text-2: #A6ACB8;
+  --bc-text-3: #6E7581;
+
+  /* Structure */
+  --bc-rule: #262C36;
+
+  /* Signal (amber = live / key emphasis / focus ring; area ≤ 5%) */
+  --bc-amber: #FFB02E;
+  --bc-amber-ink: #1B1400;          /* dark text on amber fills (contrast) */
+  --bc-amber-dim: #3A2B0E;          /* selected row ground */
+  --bc-amber-lo: #C9861F;           /* pressed amber (one step down) */
+
+  /* Status (always + shape + text; never colour alone) */
+  --bc-ok: #3DDC8B;
+  --bc-warn: #FFC53D;
+  --bc-danger: #FF5A52;
+  --bc-info: #5FA8FF;
+
+  /* Ink for coloured grounds (readable dark text on bright status) */
+  --bc-ok-ink: #06251A;
+  --bc-warn-ink: #2A1F00;
+  --bc-danger-ink: #2A0A08;
+  --bc-info-ink: #061A30;
+
+  /* Neutrals used as data-graphics strokes/fills */
+  --bc-dot-idle: #3A424E;
+  --bc-field-bg: #0E1117;
+  --bc-field-grid: #1E242E;
+
+  /* Depth — §7: only Scorebug casts a shadow; nothing else. */
+  --bc-shadow-score: 0 -8px 24px rgba(0, 0, 0, .45);
+  --bc-scrim: rgba(0, 0, 0, .0);
+
+  /* Shared spacing scale (base 8, micro 4) — §4.1 */
+  --sh-1: 4px;
+  --sh-2: 8px;
+  --sh-3: 12px;
+  --sh-4: 16px;
+  --sh-5: 24px;
+  --sh-6: 32px;
+  --sh-7: 48px;
+  --sh-8: 64px;
+  --sh-9: 96px;
+  --sh-10: 128px;
+
+  /* Type stacks — §3.1 (CJK falls to Noto Sans SC 700 in display slot) */
+  --bc-font-display: "Saira Condensed", "Barlow", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --bc-font-ui: "Barlow", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --bc-font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", "Noto Sans SC", monospace;
+
+  /* Radii — broadcast is square; only the pill button rounds hard. */
+  --bc-r-chip: 4px;
+  --bc-r-panel: 3px;
+  --bc-r-pill: 30px;
+
+  /* Motion — §6 */
+  --bc-micro: 120ms ease-out;
+  --bc-standard: 240ms ease-in-out;
+  --bc-emphasis: 480ms cubic-bezier(.16, 1, .3, 1);
+}
+
+/* --------------------------------------------------------------------------
+   2. RESET / BASE
+   -------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bc-canvas);
+  color: var(--bc-text);
+  font-family: var(--bc-font-ui);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: clip;                 /* §4.1 root anti-overflow wrapper */
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, p, ul, ol, figure, blockquote { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+
+:focus-visible {
+  outline: 2px solid var(--bc-amber); /* §8: 2px ring, ≥3:1, offset 2px */
+  outline-offset: 2px;
+}
+
+/* Type scale helpers — §3.1 */
+.overline {
+  font-family: var(--bc-font-ui);
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: var(--bc-text-2);
+}
+.display {
+  font-family: var(--bc-font-display);
+  font-weight: 700;
+  line-height: 1.0;
+  text-transform: uppercase;
+  letter-spacing: -.01em;
+  font-size: clamp(28px, 3.2vw, 44px);
+}
+.mono {
+  font-family: var(--bc-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   3. SHELL — fixed broadcast frame: strip → grid → scorebug (§4.2)
+   -------------------------------------------------------------------------- */
+.shell {
+  display: grid;
+  grid-template-rows: 40px minmax(0, 1fr) auto;   /* 1024px+: wall-screen, panels scroll inside */
+  min-height: 100dvh;
+  max-width: 1720px;
+  margin: 0 auto;
+  background: var(--bc-canvas);
+}
+
+/* -- Top signal strip (40px) -------------------------------------------- */
+.strip {
+  display: flex;
+  align-items: center;
+  gap: var(--sh-5);
+  padding: 0 var(--sh-4);
+  height: 40px;
+  background: var(--bc-panel);
+  border-bottom: 1px solid var(--bc-rule);
+  overflow: hidden;
+}
+.strip__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sh-2);
+  font-family: var(--bc-font-display);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.strip__brand i {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--bc-r-chip);
+  background: var(--bc-amber);
+  display: inline-block;
+}
+.strip__params {
+  display: flex;
+  align-items: center;
+  gap: var(--sh-3);
+  font-family: var(--bc-font-mono);
+  font-size: 13px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  color: var(--bc-text-2);
+  white-space: nowrap;
+}
+.strip__params b { color: var(--bc-text); font-weight: 700; }
+.strip__params .sep { color: var(--bc-rule); }
+.strip__spacer { flex: 1 1 auto; }
+.strip__live {
+  display: flex;
+  align-items: center;
+  gap: var(--sh-2);
+  font-family: var(--bc-font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: var(--bc-amber);
+  white-space: nowrap;
+}
+.signal-dots { display: inline-flex; gap: var(--sh-1); align-items: center; }
+.signal-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bc-dot-idle);
+  display: inline-block;
+}
+.signal-dots i.on { background: var(--bc-amber); }
+
+/* --------------------------------------------------------------------------
+   4. MAIN GRID — 12 dense columns, 1px rules not black gaps (§4.2)
+   -------------------------------------------------------------------------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-flow: dense;
+  align-content: start;
+  gap: 1px;                          /* the --bc-rule gap, painted by bg */
+  background: var(--bc-rule);        /* gaps read as hairlines */
+  border-left: 1px solid var(--bc-rule);
+  border-right: 1px solid var(--bc-rule);
+  overflow: hidden;
+}
+.panel { background: var(--bc-panel); padding: var(--sh-4); min-width: 0; }
+
+.col-hero    { grid-column: span 12; }
+.col-queue   { grid-column: span 3; grid-row: span 2; }
+.col-field   { grid-column: span 6; grid-row: span 2; }
+.col-telemetry { grid-column: span 3; grid-row: span 2; }
+
+/* Panel header (overline column-tag) */
+.panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sh-3);
+  padding-bottom: var(--sh-3);
+  margin-bottom: var(--sh-3);
+  border-bottom: 1px solid var(--bc-rule);
+}
+.panel__title {
+  font-family: var(--bc-font-display);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   5. PRIMITIVES
+   -------------------------------------------------------------------------- */
+
+/* -- ActionButton — §5.1 (A: pill primary amber / hairline secondary) --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sh-2);
+  min-height: 44px;                 /* §8 touch target */
+  padding: 0 var(--sh-5);
+  border-radius: var(--bc-r-pill);
+  font-family: var(--bc-font-ui);
+  font-weight: 600;                 /* never 400 */
+  font-size: 14px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  transition: background-color var(--bc-micro), color var(--bc-micro),
+              border-color var(--bc-micro);
+}
+.btn--primary {
+  background: var(--bc-amber);
+  color: var(--bc-amber-ink);
+  border-color: var(--bc-amber);
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--bc-text);
+  border-color: var(--bc-rule);
+}
+.btn:hover, .btn.is-hover-demo { background: var(--bc-panel-hi); }
+.btn--primary:hover, .btn--primary.is-hover-demo { background: var(--bc-amber-dim); color: var(--bc-text); border-color: var(--bc-amber); }
+.btn:active, .btn.is-active-demo { background: var(--bc-canvas); }
+.btn--primary:active, .btn--primary.is-active-demo { background: var(--bc-amber-lo); color: var(--bc-amber-ink); border-color: var(--bc-amber-lo); }
+.btn[disabled], .btn.is-disabled {
+  color: var(--bc-text-3);
+  border-color: var(--bc-rule);
+  background: var(--bc-panel);
+  cursor: not-allowed;
+}
+.btn--primary[disabled], .btn--primary.is-disabled {
+  background: var(--bc-canvas);
+  color: var(--bc-text-3);
+  border-color: var(--bc-rule);
+}
+
+/* -- StatusChip — §5.1 (team-tag: 4px radius + overline text) ----------- */
+/* colour + shape + text are three redundant channels (§8) */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sh-2);
+  height: 22px;
+  padding: 0 var(--sh-2);
+  border-radius: var(--bc-r-chip);
+  border: 1px solid var(--bc-rule);
+  background: var(--bc-panel-hi);
+  font-family: var(--bc-font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--bc-text);
+  white-space: nowrap;
+}
+.chip .glyph {
+  font-style: normal;
+  line-height: 1;
+  font-size: 11px;
+}
+.chip--ok     { border-color: var(--bc-ok);     color: var(--bc-ok); }
+.chip--warn   { border-color: var(--bc-warn);   color: var(--bc-warn); }
+.chip--danger { border-color: var(--bc-danger); color: var(--bc-danger); }
+.chip--info   { border-color: var(--bc-info);   color: var(--bc-info); }
+.chip--live   { border-color: var(--bc-amber);  color: var(--bc-amber); background: var(--bc-amber-dim); }
+.chip--solid.chip--ok     { background: var(--bc-ok);     color: var(--bc-ok-ink); }
+.chip--solid.chip--warn   { background: var(--bc-warn);   color: var(--bc-warn-ink); }
+.chip--solid.chip--danger { background: var(--bc-danger); color: var(--bc-danger-ink); }
+.chip--solid.chip--info   { background: var(--bc-info);   color: var(--bc-info-ink); }
+.chip[disabled], .chip.is-disabled {
+  border-color: transparent;
+  color: var(--bc-text-3);
+  background: var(--bc-panel);
+}
+
+/* -- NumStat big readout — §5.1 (A scoreboard variant) ------------------ */
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sh-1);
+  padding: var(--sh-3) 0;
+}
+.stat__value {
+  font-family: var(--bc-font-mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: .92;
+  font-size: clamp(32px, 4vw, 56px);
+  color: var(--bc-text);
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sh-1);
+}
+.stat__unit {
+  font-family: var(--bc-font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--bc-text-2);
+  letter-spacing: .04em;
+}
+.stat__label {
+  font-family: var(--bc-font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: var(--bc-text-2);
+}
+/* status-coloured value (with sign/glyph already in text — colour redundant) */
+.stat--ok .stat__value { color: var(--bc-ok); }
+.stat--warn .stat__value { color: var(--bc-warn); }
+.stat--danger .stat__value { color: var(--bc-danger); }
+/* clickable drill-in hover: brightness only, no displacement (§5.1) */
+.stat--link { cursor: pointer; }
+.stat--link:hover .stat__value { filter: brightness(1.06); text-decoration: underline; }
+/* empty */
+.stat--empty .stat__value { color: var(--bc-text-3); }
+/* loading (static "in progress" form: dim value + live ticks) */
+.stat--loading .stat__value { color: var(--bc-text-3); }
+.stat--loading .stat__value::after {
+  content: "▮▮▮";
+  font-size: .4em;
+  letter-spacing: .1em;
+  color: var(--bc-amber);
+}
+/* error */
+.stat--error .stat__value { color: var(--bc-danger); }
+.stat--error .stat__label { color: var(--bc-danger); }
+
+/* -- MetricPanel: seamless 3×2 NumStat grid, hairline seams (§5.1) ------ */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--bc-rule);
+  border: 1px solid var(--bc-rule);
+}
+.metric-grid > .stat {
+  background: var(--bc-panel);
+  padding: var(--sh-3);
+}
+
+/* -- TaskList — §5.1 (left column, hairline dense rows) ----------------- */
+.tasklist { display: flex; flex-direction: column; }
+.task {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--sh-2);
+  padding: var(--sh-3);
+  border-bottom: 1px solid var(--bc-rule);
+  border-left: 3px solid transparent;
+  background: var(--bc-panel);
+  transition: background-color var(--bc-micro);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+.task:hover, .task.is-hover-demo { background: var(--bc-panel-hi); }
+.task.is-selected {
+  background: var(--bc-amber-dim);
+  border-left-color: var(--bc-amber);
+}
+.task.is-selected:hover, .task.is-selected.is-hover-demo { background: var(--bc-amber-dim); filter: brightness(1.25); }
+.task__name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--bc-text);
+  overflow-wrap: anywhere;          /* no-space long-string stress (§8) */
+}
+.task__meta {
+  grid-column: 1 / -1;
+  font-family: var(--bc-font-mono);
+  font-size: 12px;
+  color: var(--bc-text-3);
+  font-variant-numeric: tabular-nums;
+}
+.task[disabled], .task.is-disabled {
+  border-left-color: transparent;
+  background: var(--bc-panel);
+  color: var(--bc-text-3);
+  cursor: not-allowed;
+}
+.task[disabled] .task__name, .task.is-disabled .task__name { color: var(--bc-text-3); }
+
+/* -- ParamReadout — §5.1 (eDPI triplet) --------------------------------- */
+.params {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sh-2) var(--sh-4);
+  font-family: var(--bc-font-mono);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.params > div { display: flex; gap: var(--sh-2); align-items: baseline; }
+.params dt { font-family: var(--bc-font-ui); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--bc-text-2); font-weight: 600; }
+.params dd { margin: 0; color: var(--bc-text); font-weight: 700; }
+
+/* -- HistoryRail — §5.1 (delta + 1px-line bar sequence) ----------------- */
+.rail { display: flex; align-items: flex-end; gap: var(--sh-1); height: 40px; }
+.rail__bar {
+  width: 6px;
+  background: var(--bc-text-3);
+  border-radius: 1px 1px 0 0;
+}
+.rail__bar.is-current { background: var(--bc-amber); }
+.delta { font-family: var(--bc-font-mono); font-weight: 700; font-variant-numeric: tabular-nums; }
+.delta--up { color: var(--bc-ok); }
+.delta--down { color: var(--bc-danger); }
+
+/* --------------------------------------------------------------------------
+   6. HERO (BLK-1) — gpt 2-line rule, wide container, no badges (§5.1)
+   -------------------------------------------------------------------------- */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--sh-5);
+  align-items: center;
+  background: var(--bc-panel-hi);
+  padding: var(--sh-6) var(--sh-4);
+}
+.hero__title {
+  font-family: var(--bc-font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -.01em;
+  line-height: .96;
+  font-size: clamp(30px, 4.4vw, 68px);
+  max-inline-size: min(20ch, 92vw);
+}
+.hero__title em { font-style: normal; color: var(--bc-amber); }
+.hero__sub {
+  margin-top: var(--sh-3);
+  max-inline-size: min(68ch, 92vw);
+  color: var(--bc-text-2);
+  font-size: 16px;
+}
+.hero__actions { display: flex; flex-direction: column; gap: var(--sh-3); align-items: stretch; }
+
+/* --------------------------------------------------------------------------
+   7. MAIN ANALYSIS FIELD — focal SVG aim distribution (§ "strong focal")
+   -------------------------------------------------------------------------- */
+.field { display: flex; flex-direction: column; }
+.field__canvas {
+  position: relative;
+  flex: 1 1 auto;
+  background: var(--bc-field-bg);
+  border: 1px solid var(--bc-rule);
+  border-radius: var(--bc-r-panel);
+  min-height: 280px;
+  overflow: hidden;
+}
+.field__canvas svg { display: block; width: 100%; height: 100%; }
+.field__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sh-3) var(--sh-5);
+  margin-top: var(--sh-3);
+  font-size: 13px;
+  color: var(--bc-text-2);
+}
+.field__legend .key { display: inline-flex; align-items: center; gap: var(--sh-2); }
+.field__legend .swatch { width: 12px; height: 12px; border-radius: 2px; flex: none; }
+.sw--traj { background: var(--bc-amber); }
+.sw--overshoot { background: var(--bc-danger); }
+.sw--stop { background: var(--bc-ok); }
+.sw--scatter { background: var(--bc-info); }
+
+/* SVG graphic colours — all tokenised */
+.s-grid { stroke: var(--bc-field-grid); stroke-width: 1; fill: none; }
+.s-axis { stroke: var(--bc-text-3); stroke-width: 1; fill: none; }
+.s-ring { stroke: var(--bc-rule); stroke-width: 1; fill: none; }
+.s-ring--core { stroke: var(--bc-text-2); }
+.s-cross { stroke: var(--bc-text); stroke-width: 1.5; }
+.s-scatter { fill: var(--bc-info); }
+.s-point { fill: var(--bc-info); stroke: var(--bc-field-bg); stroke-width: 1; }
+.s-traj { fill: none; stroke: var(--bc-amber); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.s-overshoot { fill: none; stroke: var(--bc-danger); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 2 4; }
+.s-stop { fill: var(--bc-ok); }
+.s-label { fill: var(--bc-text-2); font-family: var(--bc-font-mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+.s-label--amber { fill: var(--bc-amber); }
+.s-label--danger { fill: var(--bc-danger); }
+.s-label--ok { fill: var(--bc-ok); }
+.s-band { fill: var(--bc-amber-dim); }
+
+/* --------------------------------------------------------------------------
+   8. SCOREBUG (BLK-5 verdict + BLK-6 history) — full-width bottom (§5.1)
+   -------------------------------------------------------------------------- */
+.scorebug {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
+  align-items: center;
+  gap: var(--sh-5);
+  min-height: 120px;
+  padding: var(--sh-4) var(--sh-5);
+  background: var(--bc-score);
+  border-top: 1px solid var(--bc-rule);
+  box-shadow: var(--bc-shadow-score);   /* §7: the one and only shadow */
+  animation: scorebug-in var(--bc-emphasis) both;
+}
+@keyframes scorebug-in {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.score__verdict {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sh-2);
+  padding-right: var(--sh-5);
+  border-right: 1px solid var(--bc-rule);
+}
+.score__rec {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--bc-rule);
+  border-radius: var(--bc-r-chip);
+  overflow: hidden;
+  align-self: flex-start;
+}
+.score__rec .tag {
+  background: var(--bc-amber);
+  color: var(--bc-amber-ink);
+  font-family: var(--bc-font-ui);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  padding: var(--sh-2) var(--sh-3);
+}
+.score__rec .val {
+  font-family: var(--bc-font-mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  color: var(--bc-text);
+  padding: var(--sh-2) var(--sh-3);
+  background: var(--bc-panel);
+}
+.score__line { color: var(--bc-text); font-size: 17px; font-weight: 600; max-inline-size: 40ch; }
+
+/* centre = the giant confidence hero number */
+.score__conf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--sh-1);
+}
+.score__conf .num {
+  font-family: var(--bc-font-mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: .92;
+  font-size: clamp(56px, 8vw, 104px);
+  color: var(--bc-amber);
+}
+.score__conf .cap { color: var(--bc-text-2); }
+
+/* right = live pulse + round-over-round history (§ BLK-6) */
+.score__hist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sh-2);
+  align-items: flex-end;
+  padding-left: var(--sh-5);
+  border-left: 1px solid var(--bc-rule);
+  text-align: right;
+}
+.score__hist .row { display: flex; align-items: center; gap: var(--sh-3); justify-content: flex-end; }
+.score__hist .cap { color: var(--bc-text-2); font-size: 12px; }
+
+/* --------------------------------------------------------------------------
+   9. STATE HELPERS / BANDS (shared with showcase)
+   -------------------------------------------------------------------------- */
+.band {
+  display: flex;
+  align-items: center;
+  gap: var(--sh-3);
+  padding: var(--sh-3) var(--sh-4);
+  border-left: 3px solid var(--bc-rule);
+  background: var(--bc-panel-hi);
+  border-radius: var(--bc-r-chip);
+  border-top: 1px solid var(--bc-rule);
+  border-right: 1px solid var(--bc-rule);
+  border-bottom: 1px solid var(--bc-rule);
+}
+.band--ok { border-left-color: var(--bc-ok); }
+.band--warn { border-left-color: var(--bc-warn); }
+.band--danger { border-left-color: var(--bc-danger); }
+.band--live { border-left-color: var(--bc-amber); background: var(--bc-amber-dim); }
+.band__text b { color: var(--bc-text); }
+.band__text { color: var(--bc-text-2); }
+
+.note-empty { color: var(--bc-text-2); font-size: 14px; padding: var(--sh-4); border: 1px dashed var(--bc-rule); border-radius: var(--bc-r-panel); text-align: center; }
+.note-error { color: var(--bc-danger); font-size: 14px; padding: var(--sh-3) var(--sh-4); border: 1px solid var(--bc-danger); border-radius: var(--bc-r-panel); background: var(--bc-panel); }
+
+/* live pulse dot (transform/opacity only, ≤3Hz → no photosensitivity risk §8) */
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--bc-amber);
+  display: inline-block;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.8); } }
+
+/* --------------------------------------------------------------------------
+   10. SHOWCASE page helpers
+   -------------------------------------------------------------------------- */
+.doc-head {
+  padding: var(--sh-6) var(--sh-4) var(--sh-4);
+  border-bottom: 1px solid var(--bc-rule);
+  background: var(--bc-panel);
+}
+.doc-head .display { color: var(--bc-text); }
+.doc-head p { color: var(--bc-text-2); margin-top: var(--sh-2); max-inline-size: 68ch; }
+.spec {
+  padding: var(--sh-5) var(--sh-4);
+  border-bottom: 1px solid var(--bc-rule);
+}
+.spec__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1px;
+  background: var(--bc-rule);
+  border: 1px solid var(--bc-rule);
+  margin-top: var(--sh-3);
+}
+.spec__cell { background: var(--bc-panel); padding: var(--sh-4); display: flex; flex-direction: column; gap: var(--sh-3); }
+.spec__cell > .overline { color: var(--bc-text-3); }
+.stack { display: flex; flex-direction: column; gap: var(--sh-3); }
+.row { display: flex; flex-wrap: wrap; gap: var(--sh-3); align-items: center; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   11. RESPONSIVE — §4.2 (≤1024 stack; scorebug → sticky bar), 768, 375
+   -------------------------------------------------------------------------- */
+@media (max-width: 1279px) {
+  .col-queue, .col-field, .col-telemetry { grid-row: auto; }
+}
+
+/* ≤1024: workspace reflows to two columns (field full width, queue+telemetry share) */
+@media (max-width: 1023px) {
+  .grid { grid-template-columns: repeat(6, 1fr); }
+  .col-hero { grid-column: span 6; }
+  .col-field { grid-column: span 6; }
+  .col-queue { grid-column: span 3; }
+  .col-telemetry { grid-column: span 3; }
+  .hero { grid-template-columns: 1fr; }
+  .hero__actions { flex-direction: row; flex-wrap: wrap; }
+}
+
+/* ≤768: single column stack */
+@media (max-width: 767px) {
+  .grid { grid-template-columns: 1fr; }
+  .col-hero, .col-queue, .col-field, .col-telemetry { grid-column: 1 / -1; }
+  .strip { gap: var(--sh-3); padding: 0 var(--sh-3); }
+  .strip__params { display: none; }
+  .scorebug {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+    gap: var(--sh-4);
+    min-height: 0;
+    text-align: left;
+    position: sticky;                /* §4.2: Scorebug becomes a sticky bar */
+    bottom: 0;
+    z-index: 5;
+  }
+  .score__verdict { border-right: 0; padding-right: 0; }
+  .score__hist { border-left: 0; padding-left: 0; align-items: flex-start; text-align: left; }
+  .score__hist .row { justify-content: flex-start; }
+  .score__conf { align-items: flex-start; text-align: left; }
+}
+
+@media (max-width: 479px) {
+  .metric-grid { grid-template-columns: 1fr; }
+  .panel { padding: var(--sh-3); }
+  .hero { padding: var(--sh-5) var(--sh-3); }
+  .field__canvas { min-height: 220px; }
+}
+
+/* --------------------------------------------------------------------------
+   12. REDUCED MOTION — §6/§8: all motion → 0ms, static ambience kept.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  .scorebug { animation: none; }
+  .live-dot { animation: none; opacity: 1; transform: none; }
+}

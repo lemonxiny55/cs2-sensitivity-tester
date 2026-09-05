@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Broadcast Grid 原语状态清单:按钮、状态签、NumStat 大数字读数、任务队列、指标面板、参数条、历史轨道与裁决带在 default/hover/focus/disabled/empty/loading/error 下的静态样张。">
+<title>原语样张 · Broadcast Grid — 状态清单</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Saira+Condensed:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .showcase-wrap { max-width: 1240px; margin: 0 auto; border: 1px solid var(--bc-rule); border-top: 0; }
+</style>
+</head>
+<body>
+
+<header class="doc-head">
+  <p class="overline">Concept A · Broadcast Grid — Primitive Spec Sheet</p>
+  <h1 class="display">原语状态样张</h1>
+  <p>契约 §5.1:全部可复用原语的状态清单。hover 以 <code class="mono">.is-hover-demo</code> 静态呈现,focus 环请用 <b>Tab</b> 走到任意控件实地查看(2px 琥珀环 + 2px offset)。本页无脚本,状态即所见。</p>
+</header>
+
+<div class="showcase-wrap">
+
+  <!-- ═══ ActionButton ═══ -->
+  <section class="spec" aria-labelledby="s-btn">
+    <div class="panel__head"><h2 class="panel__title" id="s-btn">ActionButton 按钮</h2><span class="overline">主按钮 / 描边次按钮 · ≥44px · 600 字重</span></div>
+    <div class="spec__grid">
+      <div class="spec__cell">
+        <span class="overline">Default</span>
+        <div class="row">
+          <button type="button" class="btn btn--primary">开始新一轮测试</button>
+          <button type="button" class="btn btn--ghost">查看历史轮次</button>
+        </div>
+      </div>
+      <div class="spec__cell">
+        <span class="overline">Hover(静态样张)</span>
+        <div class="row">
+          <button type="button" class="btn btn--primary is-hover-demo">开始新一轮测试</button>
+          <button type="button" class="btn btn--ghost is-hover-demo">查看历史轮次</button>
+        </div>
+      </div>
+      <div class="spec__cell">
+        <span class="overline">Focus-visible(按 Tab 实地查看)</span>
+        <div class="row">
+          <button type="button" class="btn btn--primary">焦点环示例</button>
+          <button type="button" class="btn btn--ghost">焦点环示例</button>
+        </div>
+      </div>
+      <div class="spec__cell">
+        <span class="overline">Active / Disabled</span>
+        <div class="row">
+          <button type="button" class="btn btn--primary is-active-demo">按压降档</button>
+          <button type="button" class="btn btn--primary" disabled>禁用主按钮</button>
+          <button type="button" class="btn btn--ghost" disabled>禁用次按钮</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ StatusChip ═══ -->
+  <section class="spec" aria-labelledby="s-chip">
+    <div class="panel__head"><h2 class="panel__title" id="s-chip">StatusChip 状态签</h2><span class="overline">色彩 + 形状 + 文字 三通道 · 队签形 4px 圆角</span></div>
+    <div class="row">
+      <span class="chip chip--ok"><i class="glyph" aria-hidden="true">▲</i>达标</span>
+      <span class="chip chip--warn"><i class="glyph" aria-hidden="true">◆</i>边缘区间</span>
+      <span class="chip chip--danger"><i class="glyph" aria-hidden="true">✕</i>不达标</span>
+      <span class="chip chip--info"><i class="glyph" aria-hidden="true">●</i>排队中</span>
+      <span class="chip chip--live"><i class="glyph" aria-hidden="true">●</i>进行中</span>
+      <span class="chip is-disabled"><i class="glyph" aria-hidden="true">✕</i>待解锁</span>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <span class="chip chip--solid chip--ok"><i class="glyph" aria-hidden="true">▲</i>达标</span>
+      <span class="chip chip--solid chip--warn"><i class="glyph" aria-hidden="true">◆</i>边缘</span>
+      <span class="chip chip--solid chip--danger"><i class="glyph" aria-hidden="true">✕</i>不达标</span>
+      <span class="chip chip--solid chip--info"><i class="glyph" aria-hidden="true">●</i>中性</span>
+      <span class="overline">实心形态:用于裁决带与密集表头</span>
+    </div>
+  </section>
+
+  <!-- ═══ NumStat ═══ -->
+  <section class="spec" aria-labelledby="s-stat">
+    <div class="panel__head"><h2 class="panel__title" id="s-stat">NumStat 大数字读数</h2><span class="overline">A 记分条版 · Mono 700 tabular</span></div>
+    <div class="spec__grid">
+      <div class="spec__cell">
+        <span class="overline">Default / 状态色</span>
+        <div class="row">
+          <figure class="stat" aria-label="命中率 63%">
+            <span class="stat__value">63<span class="stat__unit">%</span></span>
+            <span class="stat__label">命中率</span>
+          </figure>
+          <figure class="stat stat--ok" aria-label="置信度 87%">
+            <span class="stat__value">87<span class="stat__unit">%</span></span>
+            <span class="stat__label">置信度 ▲</span>
+          </figure>
+          <figure class="stat stat--danger" aria-label="过冲率 正 4.2%">
+            <span class="stat__value">+4.2<span class="stat__unit">%</span></span>
+            <span class="stat__label">过冲率 ✕ 超阈</span>
+          </figure>
+        </div>
+      </div>
+      <div class="spec__cell">
+        <span class="overline">Hover(仅可钻取实例:亮度+6% 下划线,禁位移)</span>
+        <div class="row">
+          <figure class="stat stat--link" tabindex="0" aria-label="微调幅度 1.6 度,激活查看明细">
+            <span class="stat__value" style="filter:brightness(1.06);text-decoration:underline">1.6<span class="stat__unit">°</span></span>
+            <span class="stat__label">微调幅度 · 看明细</span>
+          </figure>
+          <figure class="stat stat--link" tabindex="0" aria-label="平均反应 312 毫秒">
+            <span class="stat__value">312<span class="stat__unit">ms</span></span>
+            <span class="stat__label">平均反应 · 看明细</span>
+          </figure>
+        </div>
+      </div>
+      <div class="spec__cell">
+        <span class="overline">Empty / Loading(静态进行形态)</span>
+        <div class="row">
+          <figure class="stat stat--empty" aria-label="平滑追踪指标:暂无数据">
+            <span class="stat__value">--</span>
+            <span class="stat__label">贴靶率 · 等待首样本</span>
+          </figure>
+          <figure class="stat stat--loading" aria-label="极限甩距指标:采样中">
+            <span class="stat__value">41<span class="stat__unit">%</span></span>
+            <span class="stat__label">采样中 ● 30/60 靶</span>
+          </figure>
+        </div>
+      </div>
+      <div class="spec__cell">
+        <span class="overline">Error / Focus-visible(Tab 实地查看)</span>
+        <div class="row">
+          <figure class="stat stat--error" aria-label="反应时 错误:采样不足">
+            <span class="stat__value">✕</span>
+            <span class="stat__label">采样不足(&lt;30 次) · 再测一轮即可</span>
+          </figure>
+          <figure class="stat stat--link" tabindex="0" aria-label="路径效率 78%,激活查看明细">
+            <span class="stat__value">78<span class="stat__unit">%</span></span>
+            <span class="stat__label">路径效率 · Tab 到我</span>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ TaskList ═══ -->
+  <section class="spec" aria-labelledby="s-task">
+    <div class="panel__head"><h2 class="panel__title" id="s-task">TaskList 任务队列</h2><span class="overline">选中行琥珀底 + 左轨 · 全状态</span></div>
+    <ul class="tasklist" style="border:1px solid var(--bc-rule)">
+      <li><button type="button" class="task" aria-pressed="true">
+        <span class="task__name">甩枪定位</span>
+        <span class="chip chip--ok"><i class="glyph" aria-hidden="true">▲</i>完成</span>
+        <span class="task__meta">5/5 档 · 命中率 66%</span>
+      </button></li>
+      <li><button type="button" class="task is-selected" aria-pressed="true">
+        <span class="task__name">平滑追踪</span>
+        <span class="chip chip--live"><i class="glyph" aria-hidden="true">●</i>进行中</span>
+        <span class="task__meta">3/5 档 · 贴靶率 71% · Tab 可见焦点环</span>
+      </button></li>
+      <li><button type="button" class="task is-hover-demo">
+        <span class="task__name">爆头线反弹</span>
+        <span class="chip chip--info"><i class="glyph" aria-hidden="true">●</i>排队中</span>
+        <span class="task__meta">hover 静态样张:行底提亮一档,不动位置</span>
+      </button></li>
+      <li><button type="button" class="task">
+        <span class="task__name">极限甩距反弹复合校验 · 误差行</span>
+        <span class="chip chip--danger"><i class="glyph" aria-hidden="true">✕</i>无效</span>
+        <span class="task__meta">该任务本轮数据无效 · 再测一轮即可</span>
+      </button></li>
+      <li><button type="button" class="task" disabled>
+        <span class="task__name">反应单球</span>
+        <span class="chip is-disabled"><i class="glyph" aria-hidden="true">✕</i>待解锁</span>
+        <span class="task__meta">复测阶段解锁</span>
+      </button></li>
+    </ul>
+    <p class="note-empty" style="margin-top:12px">还没有任务 · 点按「开始新一轮测试」添加</p>
+  </section>
+
+  <!-- ═══ MetricPanel + ParamReadout + HistoryRail ═══ -->
+  <section class="spec" aria-labelledby="s-metric">
+    <div class="panel__head"><h2 class="panel__title" id="s-metric">MetricPanel · ParamReadout · HistoryRail</h2><span class="overline">无缝 1px 线网格 / eDPI 三参数 / 1px 线柱序列</span></div>
+    <div class="metric-grid" role="group" aria-label="指标面板样张" style="max-width:720px">
+      <figure class="stat" aria-label="命中率 63%"><span class="stat__value">63<span class="stat__unit">%</span></span><span class="stat__label">命中率</span></figure>
+      <figure class="stat stat--warn" aria-label="过冲率 正 4.2%"><span class="stat__value">+4.2<span class="stat__unit">%</span></span><span class="stat__label">过冲率 ◆</span></figure>
+      <figure class="stat" aria-label="平均反应 312 毫秒"><span class="stat__value">312<span class="stat__unit">ms</span></span><span class="stat__label">平均反应</span></figure>
+      <figure class="stat stat--empty" aria-label="下冲率 暂无"><span class="stat__value">--</span><span class="stat__label">下冲率 · 空态</span></figure>
+    </div>
+    <div class="row" style="margin-top:24px;justify-content:space-between;flex-wrap:wrap;gap:24px">
+      <dl class="params" aria-label="参数条样张">
+        <div><dt>灵敏度</dt><dd>1.02</dd></div>
+        <div><dt>DPI</dt><dd>800</dd></div>
+        <div><dt>eDPI</dt><dd>816</dd></div>
+      </dl>
+      <div class="row" aria-label="历史轨道样张">
+        <span class="overline">近五轮置信度</span>
+        <div class="rail" role="img" aria-label="条形序列:54、61、66、82、87,当前轮琥珀高亮">
+          <i class="rail__bar" style="height:54%"></i>
+          <i class="rail__bar" style="height:61%"></i>
+          <i class="rail__bar" style="height:66%"></i>
+          <i class="rail__bar" style="height:82%"></i>
+          <i class="rail__bar is-current" style="height:87%"></i>
+        </div>
+        <span class="mono" style="font-size:13px;color:var(--bc-text-2)">87% <span class="delta delta--up">▲5</span> 对比上一轮</span>
+      </div>
+    </div>
+    <p class="note-error" style="margin-top:16px;max-width:720px">误差态:单格转 danger —— 采样不足(&lt;30 次),再测一轮即可。</p>
+  </section>
+
+  <!-- ═══ VerdictBand 裁决带 ═══ -->
+  <section class="spec" aria-labelledby="s-verdict">
+    <div class="panel__head"><h2 class="panel__title" id="s-verdict">VerdictBand 裁决带</h2><span class="overline">BLK-5 落位件 · 结论一句话 + 数字 + 上轮对比,不拆分</span></div>
+    <div class="stack">
+      <div class="band band--danger">
+        <span class="chip chip--solid chip--danger"><i class="glyph" aria-hidden="true">✕</i>偏快</span>
+        <span class="band__text"><b>当前灵敏度偏快</b> —— 推荐区间 <span class="mono">0.95 – 1.00</span>(eDPI 760–800)</span>
+        <span class="mono" style="margin-left:auto">置信 <b style="color:var(--bc-amber)">87%</b> <span class="delta delta--up">▲5</span></span>
+      </div>
+      <div class="band band--ok">
+        <span class="chip chip--solid chip--ok"><i class="glyph" aria-hidden="true">▲</i>达标</span>
+        <span class="band__text"><b>档位 0.98 与你的手感吻合</b> —— 复测两轮均确认</span>
+        <span class="mono" style="margin-left:auto">置信 <b style="color:var(--bc-amber)">91%</b> <span class="delta delta--up">▲4</span></span>
+      </div>
+      <div class="band band--warn">
+        <span class="chip chip--solid chip--warn"><i class="glyph" aria-hidden="true">◆</i>边缘</span>
+        <span class="band__text"><b>过冲处于边缘区间</b> —— 建议休息后补测一轮再判定</span>
+        <span class="mono" style="margin-left:auto">置信 <b style="color:var(--bc-amber)">58%</b> <span class="delta delta--down">▼9</span></span>
+      </div>
+      <div class="band band--live">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span class="chip chip--live"><i class="glyph" aria-hidden="true">●</i>复测 3/8</span>
+        <span class="band__text"><b>裁决待定</b> —— 前二名复测进行中,结果在裁决条落定</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Scorebug(签名构件,单独成段) ═══ -->
+  <section class="spec" aria-labelledby="s-score" style="padding-bottom:0">
+    <div class="panel__head"><h2 class="panel__title" id="s-score">Scorebug 裁决条(产品屏形态)</h2><span class="overline">全页唯一阴影 · 入场 emphasis 480ms(reduced-motion 下直出)</span></div>
+  </section>
+  <footer class="scorebug" aria-label="裁决条样张">
+    <div class="score__verdict">
+      <div class="score__rec"><span class="tag">推荐区间</span><span class="val">0.95 – 1.00</span></div>
+      <p class="score__line">当前灵敏度 <b>偏快 ✕</b> —— 收敛至 eDPI 760–800 后复测确认。</p>
+    </div>
+    <div class="score__conf">
+      <span class="num" aria-label="置信度 87%">87%</span>
+      <span class="overline cap">置信度 ▲ 高</span>
+    </div>
+    <div class="score__hist">
+      <div class="row"><span class="live-dot" aria-hidden="true"></span><span class="chip chip--live"><i class="glyph" aria-hidden="true">●</i>复测 3/8</span></div>
+      <div class="row">
+        <span class="cap">对比上一轮</span>
+        <span class="mono cap">置信度 87%</span><span class="delta delta--up">▲5</span>
+      </div>
+      <div class="rail" role="img" aria-label="近五轮置信度:54、61、66、82、87">
+        <i class="rail__bar" style="height:54%"></i><i class="rail__bar" style="height:61%"></i><i class="rail__bar" style="height:66%"></i><i class="rail__bar" style="height:82%"></i><i class="rail__bar is-current" style="height:87%"></i>
+      </div>
+    </div>
+  </footer>
+</div>
+
+</body>
+</html>

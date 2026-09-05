@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CS2 灵敏度赛事导播台概念:一块竞赛转播数据屏,任务队列、弹道分布主视场、实时指标堆与底部 Scorebug 裁决条,3 分钟给出灵敏度置信判定。">
+<title>广播台 · CS2 灵敏度导播屏 — Broadcast Grid 概念</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Saira+Condensed:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="shell">
+
+  <!-- ═══ 顶部信号带 40px:工具名 · 参数(BLK-2) · 会话计时 · 信号点 ═══ -->
+  <header class="strip">
+    <div class="strip__brand"><i aria-hidden="true"></i>灵敏度导播台</div>
+    <div class="strip__params" aria-label="当前参数:灵敏度 1.02,DPI 800,eDPI 816">
+      <span>灵敏度 <b>1.02</b></span><span class="sep" aria-hidden="true">|</span>
+      <span>DPI <b>800</b></span><span class="sep" aria-hidden="true">|</span>
+      <span>eDPI <b>816</b></span>
+    </div>
+    <div class="strip__spacer"></div>
+    <div class="strip__live">
+      <span class="signal-dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i></span>
+      <span>会话 <span class="mono">12:47</span></span>
+    </div>
+  </header>
+
+  <!-- ═══ 主区 12 列稠密网格 ═══ -->
+  <main class="grid">
+
+    <!-- BLK-1 钩子 -->
+    <section class="panel col-hero hero" aria-labelledby="hero-title">
+      <div>
+        <h1 class="hero__title" id="hero-title">3 分钟,测出你<em>最稳</em>的 CS2 灵敏度</h1>
+        <p class="hero__sub">初测 20 轮 + 复测确认 8 轮,候选档位全程隐藏。判定、区间与置信度在下方裁决条给出 —— 本页为纯视觉概念原型,不执行测试。</p>
+      </div>
+      <div class="hero__actions">
+        <button type="button" class="btn btn--primary">开始新一轮测试</button>
+        <button type="button" class="btn btn--ghost">查看历史轮次</button>
+      </div>
+    </section>
+
+    <!-- BLK-3 任务队列(左 3 列) -->
+    <section class="panel col-queue" aria-labelledby="queue-title">
+      <div class="panel__head">
+        <h2 class="panel__title" id="queue-title">任务队列</h2>
+        <span class="overline">初测 20 · 复测 8</span>
+      </div>
+      <ul class="tasklist">
+        <li>
+          <button type="button" class="task" aria-pressed="true">
+            <span class="task__name">甩枪定位</span>
+            <span class="chip chip--ok" aria-label="已完成"><i class="glyph" aria-hidden="true">▲</i>完成</span>
+            <span class="task__meta">5/5 档 · 命中率 66% · 过冲 +3.8%</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="task is-selected" aria-pressed="true">
+            <span class="task__name">平滑追踪</span>
+            <span class="chip chip--live" aria-label="进行中"><i class="glyph" aria-hidden="true">●</i>进行中</span>
+            <span class="task__meta">3/5 档 · 贴靶率 71% · 脱靶 4 次</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="task">
+            <span class="task__name">爆头线反弹</span>
+            <span class="chip chip--info" aria-label="未开始"><i class="glyph" aria-hidden="true">●</i>排队中</span>
+            <span class="task__meta">未开始 · 预计 4 轮</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="task">
+            <span class="task__name">极限甩距反弹复合校验</span>
+            <span class="chip chip--warn" aria-label="警告:上一轮采样不足"><i class="glyph" aria-hidden="true">◆</i>补测</span>
+            <span class="task__meta">采样不足(&lt;30 次) · 再测一轮即可</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="task" disabled>
+            <span class="task__name">反应单球</span>
+            <span class="chip is-disabled" aria-label="未解锁"><i class="glyph" aria-hidden="true">✕</i>待解锁</span>
+            <span class="task__meta">复测阶段解锁</span>
+          </button>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 中央主视场:弹道分布与甩枪轨迹(BLK-4 的图形证据) -->
+    <section class="panel col-field field" aria-labelledby="field-title">
+      <div class="panel__head">
+        <h2 class="panel__title" id="field-title">主分析场 · 甩枪分布</h2>
+        <span class="overline">推荐档 1.02 · 20 样本</span>
+      </div>
+      <div class="field__canvas">
+        <svg viewBox="0 0 640 400" preserveAspectRatio="xMidYMid meet" role="img"
+             aria-label="甩枪落点分布图:以靶心为中心的散布点、两条示例准星轨迹(一条琥珀色直线到位、一条红色虚线过冲后回拉),停点集中于靶心右上方,显示轻微过冲倾向。">
+          <defs>
+            <pattern id="fgrid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M40 0H0V40" class="s-grid"/>
+            </pattern>
+          </defs>
+          <rect width="640" height="400" fill="url(#fgrid)" aria-hidden="true"/>
+          <!-- 靶心环 + 十字 -->
+          <g aria-hidden="true">
+            <circle cx="320" cy="200" r="120" class="s-ring"/>
+            <circle cx="320" cy="200" r="64" class="s-ring s-ring--core"/>
+            <line x1="320" y1="180" x2="320" y2="220" class="s-cross"/>
+            <line x1="300" y1="200" x2="340" y2="200" class="s-cross"/>
+            <!-- 过冲带:靶心右上方的琥珀底纹停点聚集区 -->
+            <rect x="332" y="152" width="76" height="56" rx="4" class="s-band" opacity="0.5"/>
+          </g>
+          <!-- 落点散布(蓝=info,色+形+文字三通道在图例说明) -->
+          <g aria-hidden="true">
+            <circle cx="341" cy="176" r="4" class="s-point"/>
+            <circle cx="352" cy="163" r="4" class="s-point"/>
+            <circle cx="328" cy="184" r="4" class="s-point"/>
+            <circle cx="360" cy="178" r="4" class="s-point"/>
+            <circle cx="347" cy="196" r="4" class="s-point"/>
+            <circle cx="303" cy="212" r="4" class="s-point"/>
+            <circle cx="289" cy="188" r="4" class="s-point"/>
+            <circle cx="312" cy="233" r="4" class="s-point"/>
+            <circle cx="369" cy="151" r="4" class="s-point"/>
+            <circle cx="376" cy="170" r="4" class="s-point"/>
+            <circle cx="298" cy="166" r="4" class="s-point"/>
+            <circle cx="333" cy="155" r="4" class="s-point"/>
+            <circle cx="286" cy="228" r="4" class="s-point"/>
+            <circle cx="355" cy="212" r="4" class="s-point"/>
+            <circle cx="318" cy="198" r="4" class="s-point"/>
+          </g>
+          <!-- 示例轨迹 A:直线到位(琥珀) -->
+          <path d="M120 320 Q 240 268 322 206" class="s-traj" aria-hidden="true"/>
+          <circle cx="120" cy="320" r="5" class="s-stop" aria-hidden="true"/>
+          <circle cx="322" cy="206" r="5" class="s-stop" aria-hidden="true"/>
+          <!-- 示例轨迹 B:过冲回拉(红虚线) -->
+          <path d="M520 96 Q 392 128 366 148 L 344 172" class="s-overshoot" aria-hidden="true"/>
+          <circle cx="520" cy="96" r="5" class="s-stop" aria-hidden="true"/>
+          <circle cx="344" cy="172" r="5" class="s-stop" aria-hidden="true"/>
+          <!-- 读数标注 -->
+          <text x="132" y="344" class="s-label s-label--amber">到位 78%</text>
+          <text x="440" y="76" class="s-label s-label--danger">过冲回拉 14%</text>
+          <text x="408" y="188" class="s-label">停点散布</text>
+          <text x="24" y="28" class="s-label">弹道角散布 ±2.4° · 均值偏移 右上 +0.7°</text>
+        </svg>
+      </div>
+      <div class="field__legend">
+        <span class="key"><i class="swatch sw--traj" aria-hidden="true"></i>到位轨迹</span>
+        <span class="key"><i class="swatch sw--overshoot" aria-hidden="true"></i>过冲回拉</span>
+        <span class="key"><i class="swatch sw--stop" aria-hidden="true"></i>起/停点</span>
+        <span class="key"><i class="swatch sw--scatter" aria-hidden="true"></i>落点散布</span>
+        <span class="key">◆ 停点集中于右上 → 判定偏快</span>
+      </div>
+    </section>
+
+    <!-- BLK-4 实时指标堆(右 3 列) -->
+    <section class="panel col-telemetry" aria-labelledby="tele-title">
+      <div class="panel__head">
+        <h2 class="panel__title" id="tele-title">实时指标</h2>
+        <span class="overline">本轮综合</span>
+      </div>
+      <dl class="params" aria-label="当前参数">
+        <div><dt>灵敏度</dt><dd>1.02</dd></div>
+        <div><dt>DPI</dt><dd>800</dd></div>
+        <div><dt>eDPI</dt><dd>816</dd></div>
+      </dl>
+      <div class="metric-grid" role="group" aria-label="分任务与综合指标">
+        <figure class="stat stat--warn" aria-label="过冲率 正 4.2%">
+          <span class="stat__value">+4.2<span class="stat__unit">%</span></span>
+          <span class="stat__label">过冲率 ◆ 偏高</span>
+        </figure>
+        <figure class="stat" aria-label="下冲率 负 1.8%">
+          <span class="stat__value">-1.8<span class="stat__unit">%</span></span>
+          <span class="stat__label">下冲率</span>
+        </figure>
+        <figure class="stat" aria-label="命中率 63%">
+          <span class="stat__value">63<span class="stat__unit">%</span></span>
+          <span class="stat__label">命中率</span>
+        </figure>
+        <figure class="stat" aria-label="平均反应 312 毫秒">
+          <span class="stat__value">312<span class="stat__unit">ms</span></span>
+          <span class="stat__label">平均反应</span>
+        </figure>
+        <figure class="stat" aria-label="路径效率 78%">
+          <span class="stat__value">78<span class="stat__unit">%</span></span>
+          <span class="stat__label">路径效率</span>
+        </figure>
+        <figure class="stat stat--link" tabindex="0" aria-label="微调幅度 1.6 度,激活查看明细">
+          <span class="stat__value">1.6<span class="stat__unit">°</span></span>
+          <span class="stat__label">微调幅度 · 看明细</span>
+        </figure>
+      </div>
+    </section>
+  </main>
+
+  <!-- ═══ 底部 Scorebug 裁决条(BLK-5 + BLK-6) ═══ -->
+  <footer class="scorebug" aria-label="裁决条">
+    <div class="score__verdict">
+      <div class="score__rec">
+        <span class="tag">推荐区间</span>
+        <span class="val">0.95 – 1.00</span>
+      </div>
+      <p class="score__line">当前灵敏度 <b>偏快 ✕</b> —— 收敛至 eDPI 760–800 后复测确认。</p>
+    </div>
+    <div class="score__conf">
+      <span class="num" aria-label="置信度 87%">87%</span>
+      <span class="overline cap">置信度 ▲ 高</span>
+    </div>
+    <div class="score__hist">
+      <div class="row">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span class="chip chip--live" aria-label="复测进行中"><i class="glyph" aria-hidden="true">●</i>复测 3/8</span>
+      </div>
+      <div class="row">
+        <span class="cap">对比上一轮</span>
+        <span class="mono cap">过冲率 +4.2%</span>
+        <span class="delta delta--up" aria-label="上升 1.1">▲1.1</span>
+        <span class="mono cap">置信度 87%</span>
+        <span class="delta delta--up" aria-label="上升 5">▲5</span>
+      </div>
+      <div class="rail" role="img" aria-label="近五轮置信度迷你条形序列:54、61、66、82、87,当前轮最高">
+        <i class="rail__bar" style="height:54%" aria-hidden="true"></i>
+        <i class="rail__bar" style="height:61%" aria-hidden="true"></i>
+        <i class="rail__bar" style="height:66%" aria-hidden="true"></i>
+        <i class="rail__bar" style="height:82%" aria-hidden="true"></i>
+        <i class="rail__bar is-current" style="height:87%" aria-hidden="true"></i>
+      </div>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
